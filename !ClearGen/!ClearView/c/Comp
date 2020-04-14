@@ -312,7 +312,7 @@ char *p;
 
 p=param;
 *p=0;
-while(*start<=end && p<param+99 && 
+while(*start<=end && p<param+99 &&
       **start && **start!=10 && **start!='}' && **start!=',')
   *p++=*(*start)++;
 *p=0;
@@ -347,7 +347,7 @@ c->command=-1;
 c->param1[0]=0;
 c->param2[0]=0;
 c->param3[0]=0;
-while(*start<=end && p<command+49 && 
+while(*start<=end && p<command+49 &&
       **start && **start!=10 && **start!=':' && **start!='}')
   *p++=*(*start)++;
 *p=0;
@@ -1100,6 +1100,7 @@ strcpy(header.creator,owner_idstr());
 dataflex=(flex_ptr)&dataptr;
 pictflex=(flex_ptr)&pictnames;
 if(!blockflex_initblock(dataflex,DATABLOCK)) e=errorgen(0);
+dataptr->offonts=0;
 if(!e && !blockflex_allocate(dataflex,sizeof(header),DATABLOCK))
   e=errorgen(0);
 tstr("Initialised")
