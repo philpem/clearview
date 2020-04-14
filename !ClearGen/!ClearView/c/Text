@@ -258,6 +258,7 @@ if(x<=r->g.x1 && x+ppic->width>=r->g.x0)
                                y-ppic->height,&factors,pixtrans));
       }
       break;
+#ifdef EUCLID
     case FILETYPE_FILM:
       {
       sprite_area     *area;
@@ -295,6 +296,7 @@ if(x<=r->g.x1 && x+ppic->width>=r->g.x0)
       film_visible=TRUE;
       }
       break;
+#endif
     default:
       ERROUT(setcol(11,0x0000FF00,printing));
       ERROUT(bbc_rectanglefill(x,y,ppic->width,-ppic->height));
@@ -513,7 +515,7 @@ while(more)
                 cfont=hex2(p+2);
           }
         }
-      if(!print) 
+      if(!print)
         {
         ERROUT(wimp_setfontcolours(7,1));
         }
@@ -595,7 +597,8 @@ wimp_update_wind(r,&more);
 if(more) text_draw(r,FALSE,&lineptr,dataptr->currentwidth,FALSE);
 }
 
-void update_films()
+#ifdef EUCLID
+void update_films(void)
 {
 linestr        *line;
 h_pictdef      *ppic;
@@ -651,7 +654,7 @@ while(count<lines)
       s=(char*)dataptr+line->offset+o;
       switch(*s)
         {
-        case 9: 
+        case 9:
           if(*(s+4)==21 && *(s+5)=='P')
             {
             font_string fs;
@@ -697,6 +700,7 @@ while(count<lines)
   count++;
   }
 }
+#endif
 
 void text_goto1(int offset)
 {
@@ -748,7 +752,9 @@ static int counter=0;
 switch(e->e)
   {
   case wimp_ENULL:
+#ifdef EUCLID
     update_films();
+#endif
     switch(idlereason)
       {
       case 1:
@@ -817,7 +823,9 @@ switch(e->e)
         win_claim_idle_events(text_handle);
         idlereason=2;
         }
+#ifdef EUCLID
       update_films();
+#endif
       }
     if(e->data.but.m.i>=0 && (e->data.but.m.bbits&5))
       {

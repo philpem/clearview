@@ -1,3 +1,6 @@
 
 #define COMPILE TRUE
 #define FILEVERSION 1
+
+// Define to enable Ace Film support (Euclid module)
+#undef EUCLID

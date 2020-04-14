@@ -288,6 +288,7 @@ switch(pict->type)
     }
     break;
   case FILETYPE_FILM:
+#ifdef EUCLID
     {
     sprite_area *area;
     sprite_id   sprite;
@@ -300,6 +301,7 @@ switch(pict->type)
     ERROUT(get_sprite_size(area,&sprite,&(pict->width),&(pict->height)));
     }
     break;
+#endif
   default:
     return(errorgen(5));
   }
@@ -400,6 +402,7 @@ while(p<=end)
 
       fnum=atoi(c.param1);
       fsize=atoi(c.param3);
+
       if(fnum>255 || fnum<0)
         return(errorgenv(2,fnum,cstart));
       if(fsize<3 || fsize>99)
@@ -727,6 +730,7 @@ for(i=0;i<npics;i++)
       return(errorgen(0));
     if(!e) e=load_file_at(pathname,
               (void*)((int)blockflex_address(dataflex)+pict.offset));
+#ifdef EUCLID
     if(!e && pict.type==FILETYPE_FILM)
       {
       int         w,h,m,s,*p,bpp;
@@ -762,6 +766,7 @@ for(i=0;i<npics;i++)
       *(int*)((int)p+*p+4)=0;       /* decompression value for R2 */
       if(!e) e=project_next_frame(p);
       }
+#endif
     if(!e && !blockflex_padtoword(dataflex,DATABLOCK)) return(errorgen(0));
     if(!e) e=comp_sizepic(dataflex,&pict);
     if(e)
