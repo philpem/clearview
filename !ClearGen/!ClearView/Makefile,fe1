@@ -2,24 +2,24 @@
 
 
 # Toolflags:
-CCflags = -c -depend !Depend -IRISCOSLib: -throwback 
-C++flags = -c -depend !Depend -IC: -throwback 
-Linkflags = -aif -c++ -o $@ 
+CCflags = -c -depend !Depend -IRISCOSLib: -throwback -memaccess -L22-S22-L41
+C++flags = -c -depend !Depend -IC: -throwback
+Linkflags = -aif -c++ -o $@
 ObjAsmflags = -throwback -NoCache -depend !Depend
-CMHGflags = 
+CMHGflags =
 LibFileflags = -c -o $@
 Squeezeflags = -o $@
 
 
 # Final targets:
-@.!RunImage:   @.!RunImageB 
-        squeeze $(squeezeflags) @.!RunImageB 
+@.!RunImage:   @.!RunImageB
+        squeeze $(squeezeflags) @.!RunImageB
 @.!RunImageB:   @.o.BookMark @.o.Comp @.o.d3 @.o.Errors @.o.Owner @.o.Pane \
         @.o.PrintText @.o.Queue @.o.Reader @.o.SearchText @.o.Text @.o.Text1 \
-        C:o.stubs RISCOSLib:o.risc_oslib 
+        C:o.stubs RISCOSLib:o.risc_oslib
         link $(linkflags) @.o.BookMark @.o.Comp @.o.d3 @.o.Errors @.o.Owner \
         @.o.Pane @.o.PrintText @.o.Queue @.o.Reader @.o.SearchText @.o.Text @.o.Text1 \
-        C:o.stubs RISCOSLib:o.risc_oslib 
+        C:o.stubs RISCOSLib:o.risc_oslib
 
 
 # User-editable dependencies:
@@ -27,29 +27,29 @@ Squeezeflags = -o $@
 
 # Static dependencies:
 @.o.BookMark:   @.c.BookMark
-        cc $(ccflags) -o @.o.BookMark @.c.BookMark 
+        cc $(ccflags) -o @.o.BookMark @.c.BookMark
 @.o.Comp:   @.c.Comp
-        cc $(ccflags) -o @.o.Comp @.c.Comp 
+        cc $(ccflags) -o @.o.Comp @.c.Comp
 @.o.d3:   @.c.d3
-        cc $(ccflags) -o @.o.d3 @.c.d3 
+        cc $(ccflags) -o @.o.d3 @.c.d3
 @.o.Errors:   @.c.Errors
-        cc $(ccflags) -o @.o.Errors @.c.Errors 
+        cc $(ccflags) -o @.o.Errors @.c.Errors
 @.o.Owner:   @.c.Owner
-        cc $(ccflags) -o @.o.Owner @.c.Owner 
+        cc $(ccflags) -o @.o.Owner @.c.Owner
 @.o.Pane:   @.c.Pane
-        cc $(ccflags) -o @.o.Pane @.c.Pane 
+        cc $(ccflags) -o @.o.Pane @.c.Pane
 @.o.PrintText:   @.c.PrintText
-        cc $(ccflags) -o @.o.PrintText @.c.PrintText 
+        cc $(ccflags) -o @.o.PrintText @.c.PrintText
 @.o.Queue:   @.c.Queue
-        cc $(ccflags) -o @.o.Queue @.c.Queue 
+        cc $(ccflags) -o @.o.Queue @.c.Queue
 @.o.Reader:   @.c.Reader
-        cc $(ccflags) -o @.o.Reader @.c.Reader 
+        cc $(ccflags) -o @.o.Reader @.c.Reader
 @.o.SearchText:   @.c.SearchText
-        cc $(ccflags) -o @.o.SearchText @.c.SearchText 
+        cc $(ccflags) -o @.o.SearchText @.c.SearchText
 @.o.Text:   @.c.Text
-        cc $(ccflags) -o @.o.Text @.c.Text 
+        cc $(ccflags) -o @.o.Text @.c.Text
 @.o.Text1:   @.c.Text1
-        cc $(ccflags) -o @.o.Text1 @.c.Text1 
+        cc $(ccflags) -o @.o.Text1 @.c.Text1
 
 
 # Dynamic dependencies:
