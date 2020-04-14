@@ -1,0 +1,91 @@
+
+#include "stdlib.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "stdio.h"
+#include "ctype.h"
+
+#include "os.h"
+#include "wimp.h"
+#include "wimpt.h"
+#include "template.h"
+#include "coords.h"
+#include "visdelay.h"
+#include "print.h"
+
+#include "Reader.h"
+
+
+os_error *printtext(int copies,BOOL thistopic)
+{
+os_error          *e=NULL;
+print_pagesizestr pagesize;
+int               width,height,topic,handle,oldhandle=0;
+os_regset         r;
+print_transmatstr trans;
+print_positionstr pos;
+print_box         rect;
+
+wimpt_checkmode();
+if(print_pagesize(&pagesize)) return(errorgen(10));
+r.r[0]=0x83;
+r.r[1]=(int)"printer:";
+e=os_find(&r);
+handle=r.r[0];
+if(e || !handle) return(errorgen(11));
+visdelay_begin();
+trans.xx=trans.yy=1<<16;
+trans.xy=trans.yx=0;
+if(thistopic)
+  topic=dataptr->currenttopic;
+else
+  topic=0;
+width=(pagesize.bbox.x1-pagesize.bbox.x0)/400;
+height=(pagesize.bbox.y1-pagesize.bbox.y0)/400;
+rect.x0=rect.y0=0;
+rect.x1=width;
+rect.y1=height;
+pos.dx=pagesize.bbox.x0;
+pos.dy=pagesize.bbox.y0;
+queue_storepos();
+do
+  {
+  dataptr->currenttopic=topic;
+  dataptr->currentwidth=-1;
+  e=text_format(&dataptr,&lineptr,-1,width-PICMAR*2,-1);
+  if(!e)
+    {
+    int            ident;
+    wimp_redrawstr rs;
+    int            more;
+    print_box      *b;
+
+    rs.scx=rs.scy=0;
+    rs.box.x0=rs.box.y0=0;
+    rs.box.x1=width;
+    rs.box.y1=height;
+    b=(print_box*)&rs.g;
+    do
+      {
+      e=print_selectjob(handle,progname,&oldhandle);
+      if(!e) e=print_giverectangle(0,&rect,&trans,&pos,0xFFFFFF00);
+      if(!e) e=print_drawpage(copies,0,0,b,&more,&ident);
+      if(more && !e) e=text_draw(&rs,FALSE,&lineptr,
+                                 width-PICMAR*2,rs.scy-height+PICMAR);
+      if(e)
+        print_abortjob(handle);
+      else
+        print_endjob(handle);
+      } while(!e && rs.scy<=0);
+    }
+  topic++;
+  } while(topic<dataptr->sztopics && !thistopic && !e);
+r.r[1]=handle;
+r.r[0]=0;
+os_find(&r);
+dataptr->currenttopic=-1;
+queue_backstep();
+visdelay_end();
+return(e);
+}

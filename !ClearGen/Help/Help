@@ -1,0 +1,262 @@
+{Font:1,Homerton.Medium,20
+{Font:2,Homerton.Medium,16
+{Font:3,Homerton.Medium,12
+{F:1}{topic:How To Use} The {Picture:i,cvlogo} Software{F:0}{Rule:0}{Picture:R,Logo}
+{Picture:i,cvlogo} is a document reader for hyper-linked documents. You can read the text in this window using the scroll bar to the right and the tools in the toolbox at the top of the window. If you do not know how to use the scroll bar, please use your RISC OS user guide to become more familiar with RISC OS before proceeding.
+
+Text presented using {Picture:i,cvlogo} may be read in the normal way (ie from start to finish) as you might expect. The concept of hyper-linking extends this to allow the text to be read in a way more compatible with the way you think.
+
+{Index:Cross References}A hyper-link is a cross reference to another point in the text where there is further relevant information. These cross references are indicated in the text by underlined words and you may click on any such words to follow the cross references. Try this now by clicking {Ref:here,Trial Point}.
+
+Notice that whenever the pointer is over a cross reference it changes to a symbol like this: {Picture:I,pointer}. This serves as an extra reminder and also helps identify the exact area where you may click to follow a cross reference.
+
+As well as following cross references you may use the {Ref:toolbox,Toolbox Commands} and the program {Ref:menu,Main Menu} to help with reading the text.
+
+You may change the size of the window to make more text visible. If you change the width, the text will be reformatted appropriately. There is a minimum limit to the width of each document, generally relating to the size of pictures used.
+
+{Picture:L,File}{Index:Loading}New {picture:i,cvlogo} document files may be loaded by dragging them onto the application or by double clicking them. Note that only one document may be loaded at a time but you may run several copies of the software simultaneously if you really need to view two documents at once. You can recognise {picture:i,cvlogo} document files by their icons which look like the illustration on the left  (If you use small icons in your filer windows, they will look like this: {Picture:I,smallfile}). {Index:Creating Documents}If you have a {Ref:type A (advanced) version,Versions} of this software, you may drag text files to the application to compile and load them.
+
+Your use of this software is governed by the terms of the {Ref:licence,Licences} under which you are using it. Please be sure that you are complying with the terms of the licence before proceeding.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,What is} to find out more about what this software is.
+ *{>:5}Click {Ref:here,Toolbox Commands} to find out more about the toolbox.
+ *{>:5}Click {Ref:here,Main Menu} to find out more about the program menu.
+ *{>:5}Click {Ref:here,Versions} to find out more about versions of this software.
+ *{>:5}Click {Ref:here,Iconbar Menu} to find out more about the iconbar menu.
+ *{>:5}Click {Ref:here,Licences} to find out more about licences.
+ *{>:5}Click {Ref:here,Applications} to find out more about applications.
+ *{>:5}Click {Ref:here,Contact} to find out more about availability.
+{F:00000000000001
+{topic:Toolbox Commands}{F:0}{Rule:0}{Picture:R,Logo}
+The toolbox is shown at the top of the window and contains six icons. Clicking on these gives quick access to useful functions when reading a document. The icons perform the following functions:
+
+{Picture:I,forward}{Index:Forward}{>:12}Forward. This icon moves to the next topic in the order in which the topics are stored in the document. This icon will be grey if you are on the last topic in a document. This command will give access to all topics in the document.
+{Picture:I,backward}{Index:Backward}{>:12}Backward. This icon moves to the previous topic in the order in which the topics are stored in the document. This icon will be grey if you are on the first topic in a document. This command will give access to all topics in the document.
+{Picture:I,trace}{Index:Back Trace}{>:12}Back Trace. This icon allows you to retrace any movements in the document (except those due to scrolling). This is particularly useful if you have been following cross references and wish to return to the main piece of text at the point where you left it. A large but limited number of movements will be remembered.
+{Picture:I,find}{Index:Search}{>:12}Search. This icon opens a dialogue box which allows the text to be searched for index points or for particular words. Click {Ref:here,Searching} for more information about this function.
+{Picture:I,mark}{Index:Bookmark}{>:12}Bookmark. This icon opens a dialogue box which allows bookmarks to be placed in the text and to be located.  Click {Ref:here,Bookmarks} for more information about this function.
+{Picture:I,index}{Index:Index Icon}{>:12}Index. This icon takes you straight to the index page for the document. While the index page is displayed, the button will be depressed in the toolbox as a reminder.
+
+These functions are all duplicated in the Tools sub-menu of the main program {Ref:menu,Main Menu}.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Main Menu} to find out more about the main menu.
+ *{>:5}Click {Ref:here,Searching} to find out more about searching.
+ *{>:5}Click {Ref:here,Bookmarks} to find out more about bookmarks.
+{F:00000000000001
+{topic:Main Menu}{F:0}{Rule:0}{Picture:R,Logo}
+The main menu is displayed by clicking the {B:MENU} button when the mouse pointer is over the main window. This menu has three options:
+
+{F:2}Save{F:0}{Index:Saving}
+The Save option leads to a standard RISC OS save dialogue box which allows the current document to be saved. Do this by typing in the full path name and pressing {B:Return} or by entering a file name and dragging the file icon to a directory viewer. This will save the document along with any bookmarks that may have been placed in the text.
+
+{F:2}Print{F:0}{Index:Printing}
+The Print option leads to a dialogue box which shows the name of the currently installed printer driver, if any. If there is no printer driver installed, you will not be able to print. Refer to your RISC OS user guide for more information on printer drivers. Click on the {B:Print} icon to start the printout. If the option for 'This topic only' is selected, you will get a printout of just the displayed topic; otherwise the entire document will be printed. The text is formatted according to the width of paper selected by your printer driver.
+
+{F:2}Tools{F:0}{Index:Tools Menu}
+The Tools option leads to a sub-menu containing options which correspond directly with the icons on the toolbox. Refer to the {Ref:Toolbox Commands,Toolbox Commands} topic for more information.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Toolbox Commands} to find out more about the toolbox.
+{F:00000000000001
+{Topic:What is} {Picture:i,cvlogo}?{F:0}{Rule:0}{Picture:R,Logo}
+{Picture:i,cvlogo} is a utility for creating and reading hyper-linked documents. hyper-linking allows the author of a document to mark points in the text which are related to other parts of the document. The reader of the document can follow such references quickly by simply clicking on them with the mouse. This makes it very easy to wander through a document at will, following up interesting trains of thought or ideas, without losing track of the main thread. For most applications, this means that the desired information can be extracted from a document far more quickly, easily and effectively than by more traditional methods.
+
+{Picture:i,cvlogo} is designed specifically to present documents which are mostly text. It is intended to replace a traditional textbook with an electronic equivalent having all the same features and many advantages. The ability to print {Picture:i,cvlogo} documents further extends the flexibility of the system, allowing {Ref:printed,Printing} texts of very high quality to be produced from the material in a {Picture:i,cvlogo} document. Although text is central to the design of {Picture:i,cvlogo}, it is possible to illustrate {Picture:i,cvlogo} documents very easily, even including animations if desired. {Picture:i,cvlogo} undertakes the bulk of the document formatting automatically, leaving authors free to concentrate on the content of their work.
+
+{Picture:i,cvlogo} has many potential applications. Information resources of all sorts may be presented and made more accessible using {Picture:i,cvlogo}. Some typical applications might include:
+
+{>:4}*{>:8}On-line manuals such as this one. {Picture:i,cvlogo} can make creation and distribution of manuals for software quicker, cheaper and more useful to the end-user. Manuals are more easily updated and there is the possibility of interaction with the software.
+
+{>:4}*{>:8}Curriculum resources may be gathered together and presented to pupils in an easily accessible form using {Picture:i,cvlogo}. Pupils are encouraged to explore the information in their own way by following references which interest them.
+
+{>:4}*{>:8}Technical information which is subject to frequent change can be presented in a useful format without compromising the ability to provide regular updates. The Archimedes Virus Reference Document is a good example of this.
+
+{>:4}*{>:8}Complex information being distributed to users with a widely varying level of knowledge is ideally handled by a hyper-linked document. A compact overview can contain references to more detailed explanations of difficult areas, allowing experienced users to gain all the information they need quickly, while those with less knowledge will have no difficulty in finding what they need to know.
+
+{>:4}*{>:8}On-line services can use {Picture:i,cvlogo} documents to provide information containing combinations of text and pictures in one simple file format. Users can download one copy of the {Picture:i,cvlogo} reader allowing them access to easily downloaded {Picture:i,cvlogo} files.
+
+{>:4}*{>:8}Almost any information which might be provided in a book can more usefully be provided in a {Picture:i,cvlogo} file.
+
+In addition to creating, displaying and browsing your own resources there is an ever expanding range of ready-made {Picture:i,cvlogo} files on subjects ranging from European Demographics to fully cross-referenced editions of Shakespeare plays.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Contact} to find out more about availability.
+ *{>:5}Click {Ref:here,Versions} to find out more about types of software.
+ *{>:5}Click {Ref:here,Applications} to find out more about applications.
+ *{>:5}Click {Ref:here,Toolbox Commands} to find out more about the toolbox.
+ *{>:5}Click {Ref:here,How To Use} to find out more about how to use this software.
+
+{F:00000000000001
+{topic:Searching}{F:0}{Rule:0}{Picture:R,Logo}
+The text may be searched for direct access to any of the cross reference points (including topic names) or for any particular sequence of characters. To start a search, choose the Search option from the {Ref:Tools menu,Tools Menu} or click {B:SEL} over the search icon in the {Ref:toolbox,Toolbox Commands} (The search icon looks like this: {Picture:I,find} ).
+
+{F:2}Finding Cross References{F:0}{Index:Goto/Search}
+The Search Text dialogue box will appear when the tool is selected. This is divided into two parts. The top part shows a list of all cross reference points in the text. You may scroll through this list and click {B:SEL} to select any item and then click the {B:Goto} icon to see the part of the text referred to. As a short-cut, double-click {B:SEL} over the entry in the list.
+
+{F:2}Searching For Text{F:0}{Index:Search Text}
+The lower part of the dialogue box allows the text to be searched for any word or words. Type some text into the first writeable icon and click the {B:OK} icon to search for it. Note that it does not matter if the text is in upper or lower case (or mixed). The first occurrence of the text will be displayed in the document window, or a message will appear if the text could not be found.
+
+{F:2}Refining the Search{F:0}{Index:Near Icon}{Index:Or Icon}
+You may enter text into both the writable icons for a search. In this case, you may select the Or icon or the Near icon between the two pieces of text. If the Or icon is selected, the search will locate any point in the text where either of the entries appears. If the Near icon is selected, the search will only locate points where both entries appear near each other in the text. As an example this could be used to search for SEARCH near TEXT to find out about searching for text without finding all the references to searching and to text.
+
+{F:2}Finding Multiple Occurrences{F:0}{Index:Next Match}
+Once the text has been found, you may wish to search for the next place in the document where the same text appears. To do this, select the Next Match icon in the Search Text dialogue before starting the search. The search will then start from the current point instead of from the beginning.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Toolbox Commands} to find out more about the toolbox.
+ *{>:5}Click {Ref:here,Cross References} to find out more about cross references.
+{F:00000000000001
+{topic:Bookmarks}{F:0}{Rule:0}{Picture:R,Logo}
+Bookmarks may be placed at any point in the text for future reference. These may be referred to by displaying the text associated with any particular bookmark. To create and use bookmarks, choose the Bookmark option from the {Ref:Tools menu,Tools Menu} or click {B:SEL} over the bookmark icon in the {Ref:toolbox,Toolbox Commands} (the bookmark icon looks like this: {Picture:I,mark} ).
+
+{F:2}Using a Bookmark{F:0}{Index:Goto/Bookmark}
+The Bookmarks dialogue box will appear when the tool is selected. This is divided into two parts. The top part shows a list of all bookmarks currently set in the text. You may click {B:SEL} to select any of them and then click the {B:Goto} icon to see the part of the text referred to. As a short-cut, double-click {B:SEL} over the entry in the list.
+
+{F:2}Maintaining Bookmarks{F:0}
+When any bookmark is selected, you can click the {B:Delete} icon to remove it from the list. This will occur immediately and without warning, so be careful! To create a new bookmark, type the name you wish to give the bookmark into the writable icon in the lower part of the dialogue box. When the name is correct, click the {B:Create} icon and a new bookmark will be created referring to the currently displayed section of text. Note that the mark actually refers to the first word visible in the window and this will be positioned at the top of the window when the bookmark is selected in the future. This may result in a slightly different view of the text if the window is a different width at the time.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Toolbox Commands} to find out more about the toolbox.
+ *{>:5}Click {Ref:here,Cross References} to find out more about cross references.
+{F:00000000000001
+{topic:Iconbar Menu}{F:0}{Rule:0}{Picture:R,Logo}
+The main menu is displayed by clicking the {B:MENU} button when the mouse pointer is over the iconbar icon. This menu has two options:
+
+{F:2}Info{F:0}{Index:Info}
+This option displays a dialogue box which gives information about the software. There are fields showing the name of the program, the purpose of the program, the author, the version number and the ownership. The ownership is particularly important because it tells you who is allowed to use the software according to the {ref:licence,Licences} agreement. The version number should be quoted in all communications relating to this software.
+
+{F:2}Quit{F:0}{Index:Quit}
+This option terminates execution of the software. you should use this when you have finished reading documents, to free the memory used for other applications.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Licences} to find out more about the licence agreement.
+{F:00000000000001
+{topic:Applications}{F:0}{Rule:0}{Picture:R,Logo}
+{picture:i,cvlogo} is a versatile medium for presenting information of all sorts to readers of all levels of ability. The software was primarily designed for the presentation of curriculum material in educational environments but is equally useful in other areas, eg on-line manuals such as this.
+
+You may present your own information if you have a {Ref:type A (advanced) version,Versions} of the software which includes a compiler for your own documents. You may also be able to make use of the growing range of ready made {picture:i,cvlogo} documents which are available. These include information on subjects ranging from the history of science to Shakespeare plays with cross-referenced glossaries and plot overviews. Remember that the printing facilities of {picture:i,cvlogo} extend these into a useful paper based resource as well as a computer resource.
+
+Different versions of {picture:i,cvlogo}, and a wide selection of {picture:i,cvlogo} documents, are available from a wide variety of sources. In case of difficulty, please {Index:Contact}contact:{f:2}
+
+{>:15}DEC_dATA
+{>:15}PO Box 97
+{>:15}Exeter
+{>:15}EX4 4YA   UK
+
+{>:15}Telephone{>:50}0392 221702
+{>:15}International{>:50} +44 392 221702
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Versions} to find out more about types of software.
+{F:00000000000001
+{topic:Versions}{F:0}{Rule:0}{Picture:R,Logo}
+{picture:i,cvlogo} is available in three different {Ref:versions,Types of Software}. These are referred to as types E,S and A for Evaluation, Standard and Advanced.
+
+The Evaluation (E) version is a working copy of the software and may be used to read documents. However, it has no {Ref:printing,Printing} or {ref:saving,Saving} facilities and has some restrictions in other areas. If you run into any of these restrictions, a message will appear to say what has happened.
+
+The Standard (S) version has no restrictions and is able to save documents and to print them. This is the version most people are expected to use, but it has no facilities for creating new documents.
+
+The Advanced (A) version is similar to the standard version but includes a sophisticated compiler allowing hyper-linked documents to be created easily from text, sprite and draw files.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Ownership} to find out more about determining the type of software.
+{F:00000000000001
+{topic:Licences}{F:0}{Rule:0}{Picture:R,Logo}
+All Binary Star software is supplied for use governed by the terms of a licence. This licence tells you what you are allowed to do with the software and how you may use it. There are four types of {Ref:licence agreement,Types of Licence} which apply to Binary Star software.
+
+To find out{Index:Ownership} which licence you have, look at the Info box for the software you are using. This is generally done by clicking the {B:MENU} button over the iconbar icon for the software and choosing the Info option. This will display a box giving various information about the program. Among the items displayed is an Owner field. This field contains a two character code followed by some information. The first character of the code indicates the {Ref:type of software,Types of Software}. The second character indicates the {Ref:type of licence,Types of Licence} the use of the software is governed by. The following information qualifies the licence where appropriate, eg a site licence may indicate the name of the site.
+
+If you do not agree with the terms of the licence for the software you are using, you should immediately obtain a version with a more appropriate licence. If you do not wish to do this, you should immediately destroy all copies of the software in your possession and cease using it on any machine.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Types of Licence} to find out more about the different types of licence.
+ *{>:5}Click {Ref:here,Types of Software} to find out more about the different types of software.
+ *{>:5}Click {Ref:here,Pricing} to find out more about licence costs.
+{F:00000000000001
+{topic:Types of Licence}{F:0}{Rule:0}{Picture:R,Logo}
+There are four types of {Ref:licence agreement,Licences} which apply to Binary Star software. These are identified by the second character in the Owner field of the Info box for the software. The possible characters are as follows:
+
+{F:2}{B:P}{>:10}Public Domain.{Index:PD Licence}
+{F:0}{>:10}This type of licence allows the software to be copied freely and distributed at will. You may do this as long as ALL the files, including any documentation, are copied and distributed together. You may not separate the files supplied. You may not distribute the software to make a profit, directly or indirectly. A small handling charge may reasonably be levied but this should not exceed a level indicated by the average cost of discs from public domain libraries (about £1.50 including the cost of the disc, at time of writing). If you wish to include the software 'free' with any product you are selling, you need an extended licence to do this.
+{F:2}{B:1}{>:10}Single User.{Index:Single User Licence}
+{F:0}{>:10}This type of licence allows the software to be used by one person on one machine. The software may be freely copied for backup purposes but these copies may not be distributed.
+{F:2}{B:S}{>:10}Site Licence.{Index:Site Licence}
+{F:0}{>:10}This type of licence allows the software to be used on up to 30 machines at the same site, by all legitimate users at that site. The software may be freely copied for backup purposes and to install on the machines covered by the agreement but these copies may not be distributed.
+{F:2}{B:X}{>:10}Extended.{Index:Extended Licence}
+{F:0}{>:10}This type of licence is provided by special negotiation in situations where none of the others is suitable. The terms will vary in each case. You will need to find the written agreement which defines the terms of this type of licence.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Ownership} to find out more about determining the type of licence.
+{F:00000000000001
+{topic:Types of Software}{F:0}{Rule:0}{Picture:R,Logo}
+Each Binary Star product may be available in one of three versions. The type of software is indicated by the first character of the owner field of the software. The possible characters are as follows:
+
+{F:2}{B:E}{>:10}Evaluation.{Index:Evaluation Software}
+{F:0}{>:10}This is a simple version of the software with many facilities disabled or not present. It is intended to allow the software to be evaluated and tested as well as providing basic functionality as an introduction to the facilities available.
+{F:2}{B:S}{>:10}Standard.{Index:Standard Software}
+{F:0}{>:10}This is the standard version of the software which most people will use. It will have all the facilities needed for day to day use of the software and will suit the purposes of most users.
+{F:2}{B:A}{>:10}Advanced.{Index:Advanced Software}
+{F:0}{>:10}This is the most complete version of the software and will contain some special features for more intensive users. It will have extra facilities which some users will find useful.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Ownership} to find out more about determining the type of software.
+{F:00000000000001
+{topic:Pricing}{F:0}{Rule:0}{Picture:R,Logo}
+Binary Star software is priced according to the individual product, the type of software and the type of licence agreement it is governed by. There are generally four types of {Ref:licence agreement,Types of Licence} and three {Ref:types of software,Types of Software}. The prices are controlled by various rules.
+
+ *{>:5}Type E (evaluation) software is usually governed by a type P (public domain) licence and is therefore practically free of charge.
+ *{>:5}Software governed by a type P (public domain) licence is practically free of charge. The actual price depends on the supplier.
+ *{>:5}Software governed by a type S (site) licence is three times the price of the same software when governed by a type 1 (single user) licence.
+ *{>:5}Software governed by a type X (extended) licence varies in price. The actual price is negotiated when the licence is defined.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Types of Licence} to find out more about the different types of licence.
+ *{>:5}Click {Ref:here,Types of Software} to find out more about the different types of software.
+ *{>:5}Click {Ref:here,Ownership} to find out more about determining the type of licence.
+{F:00000000000001
+{topic:Index}{F:0}{Rule:0}{Picture:R,Logo}
+Index of useful reference points. Click on the underlined text to go to any referenced point in the text.
+
+{Ref:1 type licence,Single user licence}{>:40}Single user licence
+{Ref:A type software,Advanced Software}{>:40}Advanced software
+{Ref:Applications,Applications}{>:40}Possible uses for {picture:i,cvlogo}
+{Ref:Availabilty,Contact}{>:40}Where to get software etc
+{Ref:Back Trace,Back Trace}{>:40}Toolbox Command
+{Ref:Backward,Backward}{>:40}Toolbox Command
+{Ref:Bookmark,Bookmark}{>:40}Toolbox command
+{Ref:Bookmarks,Bookmarks}{>:40}Using bookmarks
+{Ref:Cross references,Cross References}{>:40}Following references
+{Ref:Contact,Contact}{>:40}Where to get software etc
+{Ref:E type software,Evaluation Software}{>:40}Evaluation Software
+{Ref:Forward,Forward}{>:40}Toolbox Command
+{Ref:Goto Icon,Goto/Bookmark}{>:40}Locating bookmarks
+{Ref:Goto Icon,Goto/Search}{>:40}Locating cross references
+{Ref:Iconbar menu,Iconbar Menu}{>:40}Using the iconbar menu
+{Ref:Index,Index Icon}{>:40}Toolbox command
+{Ref:Info,Info}{>:40}Option on iconbar menu
+{Ref:Licencing,Licences}{>:40}End user licences
+{Ref:Loading files,Loading}{>:40}Loading document files
+{Ref:Main Menu,Main Menu}{>:40}Using the main menu
+{Ref:Near Icon,Near Icon}{>:40}Finding text near other text
+{Ref:Next Match,Next Match}{>:40}Continuing a search
+{Ref:Or Icon,Or Icon}{>:40}Combining searches
+{Ref:Ownership,Ownership}{>:40}Using the Info box
+{Ref:P type licence,PD licence}{>:40}Public domain
+{Ref:Printing,Printing}{>:40}Printing the text
+{Ref:Quit,Quit}{>:40}Exits the program
+{Ref:S type licence,Site licence}{>:40}Site licence
+{Ref:S type software,Standard Software}{>:40}Standard Software
+{Ref:Search,Search}{>:40}Toolbox command
+{Ref:Searching,Searching}{>:40}Using the Search Text box
+{Ref:Saving files,Saving}{>:40}Saving document files
+{Ref:Tools Menu,Tools Menu}{>:40}Corresponds to toolbox
+{Ref:Trace,Back Trace}{>:40}Toolbox Command (Back Trace)
+{Ref:Types of Licence,Types of Licence}{>:40}Types P,1,S and X
+{Ref:Types of Software,Types of Software}{>:40}Types E,S and A
+{Ref:Versions,Versions}{>:40}Different versions of this software
+{Ref:X type licence,Extended licence}{>:40}Extended licence
+{F:00000000000001
+{topic:Trial Point}{F:0}{Rule:0}{Picture:R,Logo}
+This is an example topic used to try out cross reference following. When you have read this text you can get back to where you were when you followed the cross reference by using the Back Trace option. To do this, click select on the back trace icon in the toolbox or click {B:MENU} over this window and select the Back Trace option from the Tools sub-menu (the back trace icon looks like this: {Picture:I,trace} ).

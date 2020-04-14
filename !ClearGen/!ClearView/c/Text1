@@ -1,0 +1,442 @@
+#include "stdlib.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "stdio.h"
+
+#include "os.h"
+#include "win.h"
+#include "wimp.h"
+#include "wimpt.h"
+#include "resspr.h"
+#include "template.h"
+#include "res.h"
+#include "dbox.h"
+#include "event.h"
+#include "msgs.h"
+#include "baricon.h"
+#include "coords.h"
+#include "flex.h"
+#include "drawfdiag.h"
+#include "font.h"
+#include "colourtran.h"
+
+#include "Reader.h"
+
+#define LINEBLOCK 2048
+
+int hex2(char *p)
+{
+int t=0;
+
+t=*p-'0'-(*p>'9'?'a'-'9'-1:0);
+p++;
+return((t<<4)|(*p-'0'-(*p>'9'?'a'-'9'-1:0)));
+}
+
+int hex4(char *p)
+{
+int t=0;
+
+t=*p-'0'-(*p>'9'?'a'-'9'-1:0);
+p++;
+t=(t<<4)|(*p-'0'-(*p>'9'?'a'-'9'-1:0));
+p++;
+t=(t<<4)|(*p-'0'-(*p>'9'?'a'-'9'-1:0));
+p++;
+return((t<<4)|(*p-'0'-(*p>'9'?'a'-'9'-1:0)));
+}
+
+int hex6(char *p)
+{
+int t=0;
+
+t=*p-'0'-(*p>'9'?'a'-'9'-1:0);
+p++;
+t=(t<<4)|(*p-'0'-(*p>'9'?'a'-'9'-1:0));
+p++;
+t=(t<<4)|(*p-'0'-(*p>'9'?'a'-'9'-1:0));
+p++;
+t=(t<<4)|(*p-'0'-(*p>'9'?'a'-'9'-1:0));
+p++;
+t=(t<<4)|(*p-'0'-(*p>'9'?'a'-'9'-1:0));
+p++;
+return((t<<4)|(*p-'0'-(*p>'9'?'a'-'9'-1:0)));
+}
+
+void text_makeicon(int o,int end,wimp_w w,int x,int y,
+                   int font,linestr *line)
+{
+wimp_icreate icon;
+font_string  fs;
+wimp_i       h;
+char         *p,*s;
+int          e;
+h_fontdef    *f;
+
+s=(char*)((int)dataptr+line->offset);
+f=(h_fontdef*)((int)dataptr+dataptr->offonts);
+e=o;
+while(e<end && *(s+e)!=21 && *(s+e)) e++;
+if(o)
+  {
+  font_setfont((f+(line->flags&LF_FONT))->handle);
+  fs.x=fs.y=10000000;
+  fs.s=s;
+  fs.split=-1;
+  fs.term=o;
+  font_strwidth(&fs);
+  font_converttoos(fs.x,fs.y,&fs.x,&fs.y);
+  x+=fs.x;
+  }
+f+=font;
+font_setfont(f->handle);
+fs.x=fs.y=10000000;
+fs.s=s+o;
+fs.split=-1;
+fs.term=e-o;
+font_strwidth(&fs);
+font_converttoos(fs.x,fs.y,&fs.x,&fs.y);
+icon.w=w;
+icon.i.box.x0=x-1;
+icon.i.box.x1=x+1+fs.x;
+icon.i.box.y0=y-line->base-(f->height-f->base);
+icon.i.box.y1=icon.i.box.y0+f->height;
+icon.i.flags=wimp_BNOTIFY<<12;
+p=s+o;
+while(*p!=21) p++;
+strncpy(icon.i.data.text,p+1,5);
+icon.i.data.text[5]=0;
+wimp_create_icon(&icon,&h);
+}
+
+void delete_icons(wimp_w w)
+{
+wimp_i i;
+
+for(i=0;i<100;i++) wimp_delete_icon(w,i);
+}
+
+void clear_tabs(text_header *dataptr,int s,int e)
+{
+char *sp,*ep;
+
+sp=(char*)dataptr;
+ep=sp+e;
+sp+=s;
+while(sp<ep)
+  {
+  if(*sp==9 && *(sp+5)=='T')
+    {
+    *(sp+1)=*(sp+2)=*(sp+3)=0;
+    *(sp-1)=' ';
+    }
+  sp++;
+  }
+}
+
+os_error *text_format(text_header **dataflex,linestr **lineflex,wimp_w w,
+                      int pagewidth,int topoffset)
+{
+int            ofcurr;
+int            picremaining;
+int            leftmargin;
+int            rightmargin;
+int            indent;
+int            ofend;
+int            linecount;
+int            depth;
+int            fontnum;
+int            iconcount;
+int            rule;
+BOOL           xref,def,icon;
+linestr        line,*pline;
+char           *curr;
+h_fontdef      *fontlist;
+font_string    fs;
+wimp_wstate    state;
+wimp_redrawstr r;
+
+if((*dataflex)->currenttopic<0) return(NULL);
+if(w>=0) ERROUT(wimp_get_wind_state(w,&state));
+if(pagewidth<0) pagewidth=state.o.box.x1-state.o.box.x0-PICMAR*2;
+if(pagewidth<(*dataflex)->minwidth) pagewidth=(*dataflex)->minwidth;
+if(abs((*dataflex)->currentwidth-pagewidth)<(PICMAR*3)/4 && *lineflex)
+  return(NULL);
+(*dataflex)->currentwidth=pagewidth;
+if(*lineflex) rflex_free((flex_ptr)lineflex);
+if(!blockflex_initblock((flex_ptr)lineflex,LINEBLOCK))
+  return(errorgen(0));
+picremaining=leftmargin=rightmargin=linecount=depth=indent=fontnum=0;
+iconcount=rule=0;
+xref=def=FALSE;
+ofcurr=(*dataflex)->oftopics+(*dataflex)->currenttopic*sizeof(h_topicdef);
+ofend=ofcurr+sizeof(h_topicdef);
+ofcurr=((h_topicdef*)((int)(*dataflex)+ofcurr))->offset;
+if((*dataflex)->currenttopic<(*dataflex)->sztopics-1)
+  ofend=((h_topicdef*)((int)(*dataflex)+ofend))->offset;
+else
+  ofend=rflex_size((flex_ptr)dataflex);
+fs.y=10000;
+clear_tabs(*dataflex,ofcurr,ofend);
+if(w>=0) delete_icons(w);
+fontlist=(h_fontdef*)((int)(*dataflex)+(*dataflex)->offonts);
+while(ofcurr<ofend)
+  {
+  curr=(char*)((int)*dataflex+ofcurr);
+  line.lmar=leftmargin;
+  if(indent) line.lmar=indent;
+  line.height=0;
+  line.offset=ofcurr;
+  line.flags=fontnum&LF_FONT;
+  if(rule) line.flags|=rule;
+  if(xref) line.flags|=LF_STXREF;
+  if(def) line.flags|=LF_STDEF;
+  icon=xref|def;
+  rule=0;
+  line.base=0;
+  if(*curr==21 && *(curr+1)=='S')
+    {
+    if(picremaining)
+      {
+      pline=(linestr*)blockflex_address((flex_ptr)lineflex);
+      (pline+linecount-1)->height+=picremaining;
+      depth+=picremaining;
+      picremaining=0;
+      }
+    leftmargin=rightmargin=0;
+    line.lmar=indent;
+    line.height=hex4(curr+2)+PICMAR*2;
+    line.flags=LF_CPIC|LF_PIC;
+    ofcurr+=17;
+    }
+  else
+    {
+    int i,starttab;
+
+    starttab=0;
+    if(*curr==9 && *(curr+5)=='T') starttab=hex4(curr+6);
+    if(*curr==21 && (*(curr+1)=='Q' || *(curr+1)=='R') ||
+       (starttab &&
+        (starttab<leftmargin || starttab>pagewidth-rightmargin-284)))
+      {
+      if(picremaining)
+        {
+        pline=(linestr*)blockflex_address((flex_ptr)lineflex);
+        (pline+linecount-1)->height+=picremaining;
+        depth+=picremaining;
+        picremaining=0;
+        }
+      leftmargin=rightmargin=0;
+      if(*curr==21 && (*(curr+1)=='Q' || *(curr+1)=='R'))
+        {
+        if(*(curr+1)=='Q')
+          leftmargin=hex4(curr+6)+PICMAR;
+        else
+          rightmargin=hex4(curr+6)+PICMAR;
+        picremaining=hex4(curr+2)+PICMAR*2;
+        line.flags|=LF_PIC;
+        ofcurr+=17;
+        curr+=17;
+        }
+      line.lmar=leftmargin;
+      }
+    ERROUT(font_setfont((fontlist+fontnum)->handle))
+    ERROUT(font_converttopoints(pagewidth-rightmargin-line.lmar,10000,
+                                &fs.x,&fs.y))
+    fs.s=curr;
+    fs.split=' ';
+    fs.term=ofend-ofcurr;
+    ERROUT(font_strwidth(&fs))
+    if(!fs.term)
+      {
+      fs.split=-1;
+      fs.term=ofend-ofcurr;
+      ERROUT(font_strwidth(&fs))
+      }
+    line.height=(fontlist+fontnum)->height+LINEGAP;
+    line.base=(fontlist+fontnum)->base+LINEGAP;
+    for(i=0;i<fs.term-2;i++)
+      {
+      switch(*(curr+i))
+        {
+        case 9: i+=3; break;
+        case 26:i+=1; break;
+        case 25:
+          {
+          if(*(curr+i+2)==USDEFSIZE) def=TRUE;
+          if(*(curr+i+2)==USXREFSIZE) xref=TRUE;
+          icon=TRUE;
+          i+=2;
+          }
+          break;
+        case 21:
+          {
+          i++;
+          switch(*(curr+i))
+            {
+            case 'B':line.flags|=LF_BOXS; i++; break;
+            case 'C':line.flags|=LF_BOXE; i++; break;
+            case 'F':
+              {
+              h_fontdef *f;
+              int       t;
+
+              fontnum=hex2(curr+i+1);
+              f=fontlist+fontnum;
+              t=f->base+LINEGAP;
+              if(t>line.base)
+                {
+                line.height+=t-line.base;
+                line.base=t;
+                }
+              t=f->height;
+              if(t>line.height) line.height=t;
+              i+=3;
+              }
+              break;
+            case 'K':line.flags|=LF_KEY;  i++; break;
+            case 'P':
+              {
+              int h;
+
+              line.flags|=LF_IPIC;
+              h=hex4(curr+i+1)+LINEGAP;
+              if(h>line.base)
+                {
+                line.height+=h-line.base;
+                line.base=h;
+                }
+              i+=11;
+              }
+              break;
+            case '-': rule=LF_RULE; i++; break;
+            case '.': rule=LF_RULE1; i++; break;
+            case '=': rule=LF_RULE2; i++; break;
+            case 'T':
+              {
+              int         tabpos,x,y;
+              font_string fs1;
+
+              tabpos=hex4(curr+i+1);
+              fs1.s=curr;
+              fs1.split=-1;
+              fs1.term=i-5;
+              fs1.x=fs1.y=100000000;
+              ERROUT(font_strwidth(&fs1))
+              font_converttoos(fs1.x,fs1.y,&x,&y);
+              if(x+leftmargin<tabpos &&
+                 (!rightmargin || tabpos<pagewidth-rightmargin-284))
+                {
+                indent=tabpos;
+                *(curr+i-6)=32;
+                font_converttopoints(tabpos-x-leftmargin,y,&x,&y);
+                *(curr+i-4)=x&0xff;
+                *(curr+i-3)=(x>>8)&0xff;
+                *(curr+i-2)=(x>>16)&0xff;
+                ERROUT(font_setfont((fontlist+fontnum)->handle))
+                ERROUT(font_converttopoints(pagewidth-rightmargin-leftmargin
+                       ,10000,&fs.x,&fs.y))
+                fs.s=curr;
+                fs.split=' ';
+                fs.term=ofend-ofcurr;
+                ERROUT(font_strwidth(&fs))
+                }
+              else
+                {
+                *(curr+i-6)=10;
+                fs.term=i-6;
+                }
+              }
+              break;
+            case 'X': xref=FALSE; i+=5; break;
+            case 'D': def=FALSE; i+=5; break;
+            }
+          }
+          break;
+        }
+      }
+    ofcurr+=fs.term+1;
+    }
+  if(*(curr+fs.term)==10) indent=0;
+  blockflex_allocate((flex_ptr)lineflex,sizeof(linestr),LINEBLOCK);
+  pline=(linestr*)blockflex_address((flex_ptr)lineflex);
+  if(picremaining)
+    {
+    line.flags|=LF_PICCONT;
+    picremaining-=line.height;
+    if(picremaining<=0)
+      {
+      picremaining=0;
+      leftmargin=rightmargin=0;
+      }
+    }
+  *(pline+linecount)=line;
+  if(icon && iconcount<100 && w>=0)
+    {
+    int i;
+    int y=-depth-PANEHEIGHT-PICMAR;
+    int x=line.lmar+PICMAR;
+    int font;
+
+    font=line.flags&LF_FONT;
+    if((line.flags&(LF_STXREF|LF_STDEF)) && iconcount<100)
+      {
+      iconcount++;
+      text_makeicon(0,fs.term,w,x,y,font,&line);
+      }
+    for(i=0;i<fs.term-2;i++)
+      {
+      switch(*(curr+i))
+        {
+        case 9: i+=3; break;
+        case 25:
+          if(*(curr+i+2) && iconcount<100)
+            {
+            iconcount++;
+            text_makeicon(i,fs.term,w,x,y,font,&line);
+            }
+          i+=2;
+          break;
+        case 21:
+          if(*(curr+i+1)=='F') font=hex2(curr+i+2);
+          break;
+        }
+      }
+    }
+  linecount++;
+  depth+=line.height;
+  }
+depth+=picremaining;
+blockflex_trimblock((flex_ptr)lineflex);
+if(w>=0)
+  {
+  r.w=w;
+  r.box.x0=0;
+  r.box.x1=1000000000;
+  r.box.y0=-depth-PICMAR*2-PANEHEIGHT;
+  if(r.box.y0>state.o.box.y0-state.o.box.y1)
+    r.box.y0=state.o.box.y0-state.o.box.y1;
+  r.box.y1=-1;
+  wimp_set_extent(&r);
+  if(topoffset>=0)
+    {
+    int  i=PICMAR;
+
+    pline=lineptr;
+    while(topoffset>=pline->offset)
+      {
+      i+=pline->height;
+      pline++;
+      }
+    i-=(--pline)->height;
+    if(i<=PICMAR+PANEHEIGHT) i=0;
+    state.o.y=-i;
+    }
+  text_openwindow(&state.o);
+  r.box.y0=r.box.x0=-1000000000;
+  r.box.y1=r.box.x1=1000000000;
+  text_update(&r);
+  }
+return(NULL);
+}

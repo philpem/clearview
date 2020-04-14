@@ -1,0 +1,141 @@
+
+#include "stdlib.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "stdio.h"
+
+#include "os.h"
+#include "win.h"
+#include "wimp.h"
+#include "wimpt.h"
+#include "resspr.h"
+#include "template.h"
+#include "res.h"
+#include "dbox.h"
+#include "event.h"
+#include "msgs.h"
+#include "baricon.h"
+
+#include "Reader.h"
+#include "d3.h"
+
+void pane_greyselicon(int icon,BOOL grey,BOOL select)
+{
+wimp_set_icon_state(pane_handle,icon,
+                    (grey?wimp_INOSELECT:0)|(select?wimp_ISELECTED:0),
+                    wimp_INOSELECT|wimp_ISELECTED);
+}
+
+os_error *pane_greyicons(void)
+{
+pane_greyselicon(0,dataptr->currenttopic==dataptr->sztopics-1,FALSE);
+pane_greyselicon(1,dataptr->currenttopic==0,FALSE);
+pane_greyselicon(2,queue_isempty(),FALSE);
+pane_greyselicon(3,FALSE,searchtext_isopen());
+pane_greyselicon(4,bbc_inkey(-1),bbc_inkey(-2));
+pane_greyselicon(5,FALSE,FALSE);
+pane_greyselicon(6,FALSE,dataptr->currenttopic==dataptr->indextopic);
+return(NULL);
+}
+
+os_error *pane_button(wimp_mousestr *m)
+{
+os_error *e;
+
+e=NULL;
+if(m->i>=0)
+  {
+  searchtextclose();
+  wimp_set_icon_state(pane_handle,m->i,wimp_ISELECTED,wimp_ISELECTED);
+  }
+switch(m->i)
+  {
+  case 0:
+    queue_storepos();
+    e=select_topic(dataptr->currenttopic+1,-1);
+    break;
+  case 1:
+    queue_storepos();
+    e=select_topic(dataptr->currenttopic-1,-1);
+    break;
+  case 2:
+    queue_backstep();
+    break;
+  case 3:
+    e=searchtext();
+    break;
+  case 5:
+    e=bookmark();
+    break;
+  case 6:
+    queue_storepos();
+    e=select_topic(dataptr->indextopic,-1);
+    break;
+  }
+pane_greyicons();
+return(e);
+}
+
+os_error *pane_closewindow(void)
+{
+os_error *e,*e1;
+
+e=NULL;
+if(pane_handle)
+  {
+  e=wimp_close_wind(pane_handle);
+  e1=wimp_delete_wind(pane_handle);
+  if(!e) e=e1;
+  win_register_event_handler(pane_handle,NULL,0);
+  }
+pane_handle=0;
+return(e);
+}
+
+os_error *pane_openwindow(wimp_openstr *o)
+{
+os_error *e;
+
+e=wimp_open_wind(o);
+return(e);
+}
+
+os_error *pane_open_near(wimp_openstr *o)
+{
+wimp_openstr p;
+
+p=*o;
+p.w=pane_handle;
+p.x=p.y=0;
+p.box.x1=p.box.x0+PANEWIDTH;
+p.box.y0=p.box.y1-PANEHEIGHT;
+if(p.behind==pane_handle || p.behind==text_handle)
+  {
+  wimp_wstate state;
+
+  if(!wimp_get_wind_state(pane_handle,&state))
+    p.behind=state.o.behind;
+  }
+return(pane_openwindow(&p));
+}
+
+void pane_eventproc(wimp_eventstr *e,void *handle)
+{
+os_error *error;
+
+error=NULL;
+switch(e->e)
+  {
+  case wimp_EOPEN:
+    error=pane_openwindow(&(e->data.o));
+    break;
+  case wimp_ECLOSE:
+    error=pane_closewindow();
+    break;
+  case wimp_EBUT:
+    error=pane_button(&e->data.but.m);
+    break;
+  }
+wimpt_complain(error);
+}

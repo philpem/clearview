@@ -1,0 +1,48 @@
+#
+# Messages file for Reader
+#
+Owner:Sorry! This version of the software can't perform the requested function. Upgrade your software and try again!
+NoData: There is no file loaded. You must load a suitable file before you can open the window to read it in.
+NoCache:** WARNING ** The font cache is very small. Files will therefore take a very long time to display. You should use the task manager to allocate more font cache before proceeding.
+#
+err00:Insufficient memory. Free some memory and try again.
+err01:Too many font definitions in source file.
+err02:Source file has no topic called 'Index'.
+err03:There is text preceding the first topic identifier.
+err04:There is an illegal command preceding the first topic identifier.
+err05:Picture file is not a recognised type.
+err06:Unable to create dialogue window.
+err07:Too many bookmarks. Please delete one and try again.
+err08:Please give a name for the new bookmark.
+err09:Search failed. The requested text could not be found.
+err10:No printer driver. You must load a printer driver before printing.
+err11:Can't gain access to printer. Free printer driver and try again.
+err12:Unable to render Draw file.
+badfont:Unable to use font '%s' (%s). Using Trinity.Medium instead.
+noname:<Untitled>
+NoDrive:Not Present
+#
+# Compiler messages
+#
+errv00:Unknown command '%s' at location %d.
+errv01:Font %d redefined at location %d.
+errv02:Illegal font number %d at location %d.
+errv03:Topic name '%s' redefined at location %d.
+errv04:Index tag '%s' redefined at location %d.
+errv05:Index tag '%s' at location %d duplicates topic name.
+errv06:Error processing picture '%s': %s
+errv07:Illegal picture position '%s' at location %d (use I,L,R or C).
+errv08:Illegal tab position '%s' at location %d (use >0 and <150).
+errv09:Illegal button '%s' at location %d. Use one word up to 12 characters.
+errv10:Illegal font reference '%s' at location %d.
+errv11:Definition refers to unknown topic '%s' at location %d.
+errv12:Cross reference to unknown index tag '%s' at location %d.
+errv13:File '%s' not found.
+errv14:File '%s' is a directory.
+errv15:Font %d at location %d should have a size in the range 4 to 99.
+#
+#
+mReader:>Info,Quit
+mReader1:>Save,>Print,Tools
+mtTools:Tools
+mTools:Next Topic,Prev Topic,Back Trace,Search,Bookmark,Index

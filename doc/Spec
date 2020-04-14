@@ -1,0 +1,115 @@
+
+I have had a number of enquiries about the hyper-help software mentioned
+in c.s.a recently. There follows a brief description which I knocked up to
+answer these queries.
+
+As you can see from my email address, I am using a public access system to
+talk to usenet. This has 3 problems:
+
+   1. The loadings are rather high as the service is free.
+   2. I don't know the first thing about Unix so I probably don't get
+      the most out of mail/news.
+   3. I have to communicate with it at 2400baud via an SM2400 modem and
+      this means I have serious handshaking & phonebill problems.
+
+If any of the above lead to problems contacting me, please use GPO at the
+address below (if anybody has any suggestions for tackling any of the
+above problems, I would be grateful for advice :-).
+
+If you would like a copy of the PD version of the software (details below)
+send a blank, formatted disc and SAE and I will send one when it is ready
+(one day... :-). I do not propose to email the code anywhere at the moment
+for the reasons outlined above.
+
+Hope this is what you're all looking for. If not, suggestions received in
+the best of spirits.
+
+  Merlyn Kline
+  (Address redacted)
+
+------------------------------------------------------------------------
+
+I am just finishing up writing a program for hyper-help which is very
+similar to that provided with windows 3. It is mainly intended for use as
+an interactive book in a teaching environment but would also be very
+appropriate for an on-line manual (it is intended that future versions
+will support direct communication with applications [perhaps via Impulse]
+as per windows help).
+
+The software displays pages of text with pictures embedded in it. The
+pictures may be treated as words (cf Impression II embedded frames) or may
+be positioned against the left/right margins or centred. Text is wrapped
+around the pictures where appropriate. The text may be in any available
+font and may contain cross-references to any point in the text. These
+cross-references may be followed by clicking with the mouse. A selection
+of icons allows you to browse through the available topics and to retrace
+your path (useful after cross-referencing). It is also possible to place
+named bookmarks and to search for index points or for any specified text.
+I have not included the annotation feature with the windows version but
+may do on a future release.
+
+The documents are reformatted automatically when the window changes size
+so there is only need for a vertical scroll bar. When printing, the
+documents are automatically formatted according to the size of paper
+reported by the printer driver.
+
+Documents are created by providing a text file containing special commands
+enclosed in curly brackets. This may refer to pictures in the form of
+sprite or draw files (in the current version - other formats are planned
+for, eg Ace films). The commands control the formmatting of the text when
+it is displayed. They include the following:
+
+FONT:number,name,size
+ Sets up font references in a similar way to Draw text areas.
+
+INDEX:tag
+ Sets up and index point in the text for cross-referencing.
+
+TOPIC:topic name
+ Starts a new topic. Each topic is one 'window full.'
+
+F:number
+ Selects font (defined by FONT) for following text.
+
+PICTURE:pos,filename
+ Inserts picture. pos indicates left/right/centre/in-line.
+
+B:button name
+ Puts 'button name' on a 3D plinth - on-line manual feature.
+
+>:number
+ Tabs to specified position in mm and sets left margin indent.
+
+REF:word,indextag
+ Underlines 'word' and allows cross-reference to indextag
+
+RULE:type
+ Draws a rule-off across the page. Types include double, broken.
+
+This software will probably be available in three forms:
+
+The basic PD version will display files and that will be all. You will be
+able to distribute this free for no gain etc as per most PD.
+
+The display version will be similar to the PD version but will allow
+printing, saving (eg bookmarks, annotations if implemented), etc. This
+will be available for a small charge (perhaps #10.00).
+
+The full version will also compile documents from files as described
+above. This will be available for a slightly higher price again (perhaps
+#50.00).
+
+Initial supplier will be:
+
+  dec_DATA
+  60 Danes Rd
+  Exeter
+  EX4 4LS
+  Voice: +44 392 221702
+
+They have an electronic catalogue - see their ads in Acorn press. Their
+catalogue will probably have the PD version of this software on it fairly
+soon. The PD version will hopefully spread in the usual way; I am not sure
+if it is appropriate to post this to Newcastle.
+
+------------------------------------------------------------------------

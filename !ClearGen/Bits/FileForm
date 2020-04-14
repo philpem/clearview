@@ -1,0 +1,126 @@
+For more information contact:
+
+  Binary Star
+  Merlyn Kline MIAP, Consultant Software Engineer
+  29, Bonhay Road, Exeter, EX4 4BP, UK
+
+Word: Version number of creating software
+      (incremented only to avoid compatability problems)
+Word: Minimum width to display at (os units)
+Word: Offset of start of main text (**E**)
+Word: Offset of start of picture data (**F**)
+Word: File size after decompression (if any)
+Word: Compression technique (currently must be 0=none)
+Word: Number of entries in dictionary
+Word: Offset of start of dictionary definitions (**A**)
+Word: Number of topics
+Word: Offset of start of topic definitions (**B**)
+Word: Number of index entries (these include topic names)
+Word: Offset of start of index definitions (**C**)
+Word: Number of fonts used
+Word: Offset of start of font info (**D**)
+Word: Topic number of index topic
+Word: Current topic number (for runtime use)
+Word: Current width (OS Units) (for runtime use)
+15 * 21 byte bookmark names (20 chars + zero terminator)
+15 * Word: Offset of bookmark
+<32 byte creator identity>
+ (**D**)
+For each font used:
+  h_fontdef:
+    Word: Size (points)
+    Word: User allocated number
+    Word: Font manager's handle (for runtime use)
+    Word: Height (for runtime use)
+    Word: Height above baseline (for runtime use)
+For each font used:
+  char[]: <zero terminated font name>
+<null pad to word boundary>
+ (**B**)
+For each topic:
+  h_topicdef:
+    Word: Offset of text for topic
+    Word: Flags for topic (currently, must be zero)
+For each topic:
+  char[]: <zero terminated topic name>
+<null pad to word boundary>
+ (**C**)
+For each index entry:
+  h_indexdef:
+    Word: offset of text for entry
+For each index entry:
+  char[]: <zero terminated tag string>
+<null pad to word boundary>
+ (**A**)
+For each entry in the dictionary (plus one terminator pointing beyond end):
+  h_dictdef:
+    Word: Offset of definition
+For each entry in the dictionary:
+  char[]: <unterminated string>
+<null pad to word boundary>
+ (**F**)
+For each picture:
+  h_pictdef:
+    Word: Offset of picture data
+    Word: size of picture data (not including pad bytes)
+    Word: type (file type number)
+    Word: Height in OS Units
+    Word: Width in OS Units
+For each picture:
+  Picture data, depends on type:
+    For &AFF (Draw):
+      The draw file, verbatim
+    For &FF9 (Sprite):
+      The sprite file, verbatim
+    For &D6A (AceFilm):
+      The film, verbatim
+      <null pad to word boundary>
+      Word: Frame offset (offset part of R1 value to Euclid)
+      Word: Delta compression code (R2 value to Euclid)
+      Sprite area containing sprite to render frame in.
+  <null pad to word boundary>
+ (**E**)
+Text.
+  This is stored with all forced new-lines in place.
+  Other coding is as follows (xxx.. represents a hex number in ASCII form.
+  where several hex numbers occur, yyy... and zzz... are used. Hex letters
+  MUST be in lower case):
+   Font change:        <26><Number><21>Fxx<0>
+     <Number>:   run-time font handle, set up on loading etc
+     xx:         the internal font number
+   Definition Start:   <25><??226??><??25??>
+   Definition End:     <25><0><0><21>Dxxxx<0>
+     xxxx:       the topic number referred to
+   Cross ref Start:    <25><??226??><??50??>
+   Cross ref End:      <25><0><0><21>Xxxxx<0>
+     xxxx:       the index entry number referred to
+   Box Start:          <21>B<0>
+   Box End:            <21>C<0>
+   Key Start:          <21>K<0>
+   Key End:            <21>L<0>
+   Ruleoff:            <21>-<0>
+   Broken Ruleoff:     <21>.<0>
+   Double Ruleoff:     <21>=<0>
+   Tab:                <32><9><L><M><H><21>Txxxx<0>
+     xxxx:       requested position, from the source file (os units)
+   PictureI:           <9><L><M><H><21>Pxxxxyyyyyy<0>
+     xxxx:       height of picture (OS Units)
+     yyyyyy:     offset of picture header (**F**)
+   PictureL:           <21>Qxxxxyyyyzzzzzz<0>
+     xxxx:       height of picture (OS Units)
+     yyyy:       width of picture (OS Units)
+     zzzzzz:     offset of picture header (**F**)
+   PictureR:           <21>Rxxxxyyyyzzzzzz<0>
+     xxxx:       height of picture (OS Units)
+     yyyy:       width of picture (OS Units)
+     zzzzzz:     offset of picture header (**F**)
+   PictureC:           <21>Sxxxxyyyyzzzzzz<0>
+     xxxx:       height of picture (OS Units)
+     yyyy:       width of picture (OS Units)
+     zzzzzz:     offset of picture header (**F**)
+       (Note that picture types L, R and C will always follow a
+       new-line or be at the start of the document.)
+<null pad to word boundary>
+
+
+(NB: <21> codes used: BCDFKLOTPQRSX.-=)

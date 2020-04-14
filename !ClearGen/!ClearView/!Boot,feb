@@ -1,0 +1,3 @@
+Run <Obey$Dir>.InitApp
+*Set Alias$@RunType_C29 Run <Obey$Dir> %%*0
+*Set File$Type_C29 HelpBook

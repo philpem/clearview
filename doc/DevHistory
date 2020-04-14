@@ -1,0 +1,61 @@
+
+30/11/91  21:00  +4.0
+01/12/91  11:15  +1.0
+01/12/91  13:20  +2.0
+01/12/91  16:15  +4.0 Window display working, basic structure ok
+06/12/91  20:30  +3.0 File structure defined
+07/12/91  12:00  +0.5
+07/12/91  18:00  +6.0 Compiler basically working
+08/12/91  12:00  +2.0 Compiler handling all but pictures and text
+09/12/91  21:30  +2.5 Installed protection & special info
+10/12/91  21:15  +1.3 Tidied protection & special info
+14/12/91  20:00  +3.5 Pictures mostly compiled
+15/12/91  13:00  +1.5 Bug in picture compiler still not fixed!
+15/12/91  22:00  +1.5 Pictures OK (but no sizing), text mostly done
+16/12/91  20:30  +1.0 Compiler all working (no cross refs or picture sizing)
+20/12/91  20:45  +2.5 Pictures sized, cross ref mostly done
+22/12/91  11:30  +1.0 Compiler complete, including draw files
+22/12/91  16:30  +4.0 Font finding OK, reformatter well under way
+22/12/91  23:00  +1.5 Reformatter continued, re-draw mostly in
+23/12/91  10:00  +2.0 Redraw generally ok on text (displays something!)
+24/12/91  17:45  +1.0 Redraw includes some pics, drawfiles displayed
+31/12/91  11:30  +2.3 Redraw improved, compile pics debugged
+02/01/92  23:00  +2.0 Redraw/format improved (pic posn, in-line pics)
+03/01/92  10:10  +2.0 Redraw/format improved (line heights, line flags)
+03/01/92  15:30  +1.0 Redraw/format improved, bugs in pics/fontfind
+11/01/92  10:50  +2.3 Fixed nasty bugs in redraw/compiler
+11/01/92  11:15  +1.5 Redraw/format improved, auto reformat working
+12/01/92  11:50  +4.0 Some buttons OK, tabs done, icons greyable
+18/01/92  11:45  +2.0 Detect pointer over reference, change shape
+22/01/92  22:10  +1.7 Click over ref working, various tidy-ups
+25/01/92  18:10  +1.0 cross refs and backtrace working fully
+25/01/92  21:10  +3.0 Load,Save,Open,Menu,Menutools,all aok
+28/01/92  20:45  +1.5 Buttons redrawn correctly
+31/01/92  23:15  +1.6 Various bug fixes and improvements
+03/02/92  20:30  +2.0 Rule-offs designed and implemented
+04/02/92  22:15  +1.5 Bookmarks dbox installed
+05/02/92  22:45  +1.5 Bookmarks fully working inc double-click
+07/02/92  21:30  +1.0 Designed search window template
+07/02/92  23:30  +1.5 Search window opened but can't have pane on dbox!
+08/02/92  19:00  +4.5 Pane on dbox, search index ok, power cut!
+09/02/92  08:20  +1.0 Search index now in sorted order, tidied up, all OK
+09/02/92  13:30  +1.0 Search for text basically working
+10/02/92  21:20  +1.5 Evaluation checks in and working
+23/02/92  15:15  +1.7 Search option complete and debugged
+23/02/92  21:00  +1.5 Print option started - basic skeleton working
+24/02/92  20:10  +2.0 Print option does simple print
+14/03/92  12:00  +3.0 Started help file
+15/03/92  13:00  +3.0 Finished help file
+15/03/92  21:00  +0.8 Various bug fixes
+21/03/92  15:15  +2.0 Fix multi pic refs, started new licence control
+21/03/92  18:05  +5.0 New licence, various bug fixes, move tool pane
+22/03/92  11:00  +1.7 New icons, removed annotate, various tidying
+22/03/92  17:00  +5.0 Printing now working correctly, went to v0.20
+01/04/92  20:15  +2.0 Loads/displays ace films (no animation)
+05/04/92  04:30  +2.5 Bug fixes
+07/04/92  21:10  +1.0 Bug fix
+11/04/92  12:10  +4.0 Manual written
+12/04/92  19:15  +1.6 Finished manual, sent to A.Glover, went to v0.30
+17/04/92  14:00  +1.0 Bug fix
+25/04/92  18:30  +1.5 Bug fix, tidy up, create producer, finished.
+12/05/92  21:00  +1.5 Bug fix, v1.01

@@ -1,0 +1,465 @@
+
+#define VERSION  "1.09 32bit"
+
+#include "stdlib.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "stdio.h"
+
+#include "os.h"
+#include "win.h"
+#include "wimp.h"
+#include "wimpt.h"
+#include "resspr.h"
+#include "template.h"
+#include "res.h"
+#include "dbox.h"
+#include "event.h"
+#include "msgs.h"
+#include "baricon.h"
+#include "flex.h"
+#include "werr.h"
+#include "font.h"
+#include "visdelay.h"
+
+#include "Reader.h"
+#include "Control.h"
+#include "Owner.h"
+
+char        progname[30];
+wimp_w      text_handle;
+wimp_w      pane_handle;
+text_header *dataptr;
+linestr     *lineptr;
+font        tfonts[6];
+char        pathname[256];
+BOOL        modified;
+BOOL        eversaved;
+BOOL        film_visible=FALSE;
+BOOL        cli=FALSE;
+char        help_provider[100];
+int         o_x0,o_y0,o_x1,o_y1;
+
+#include "Menus.c"
+
+BOOL rflex_alloc(flex_ptr p,int size)
+{
+if(cli)
+  {
+  int *t;
+
+  *p=malloc(size+4);     /* extra 4 bytes to store size */
+  if(!*p) return(FALSE);
+  t=*(int**)p;           /* pointer to allocated space */
+  *t=size;               /* store allocated size */
+  *(int*)p+=4;           /* increment pointer to avoid size being stomped */
+  return(TRUE);
+  }
+return(flex_alloc(p,size));
+}
+
+BOOL rflex_extend(flex_ptr p,int size)
+{
+if(cli)
+  {
+  int *t;
+
+  t=*(int**)p;
+  t--;
+  t=realloc(t,size+4);
+  *(int**)p=t;
+  if(!t) return(FALSE);
+  *t=size;               /* store allocated size */
+  *(int*)p+=4;           /* increment pointer to avoid size being stomped */
+  return(TRUE);
+  }
+return(flex_extend(p,size));
+}
+
+void rflex_free(flex_ptr p)
+{
+if(cli)
+  {
+  int *t;
+
+  t=*(int**)p;
+  t--;
+  free(t);
+  *p=NULL;
+  }
+else
+  flex_free(p);
+}
+
+int rflex_size(flex_ptr p)
+{
+if(cli)
+  {
+  int *t;
+
+  t=*(int**)p;
+  t--;
+  return(*t);
+  }
+return(flex_size(p));
+}
+
+BOOL checkeval(void)
+{
+dbox        d;
+int         field=0;
+static BOOL checked=FALSE;
+
+if(checked || owner_software_type()>0) return(TRUE);
+if(!strcmp(owner_idstr(),"EP:Acorn Documents {SKLC}\n"))
+  {
+  checked=TRUE;
+  return(TRUE);
+  }
+while(field!=3 && field!=15)
+  {
+  d=dbox_new("eval");
+  if(!d) return(FALSE);
+  dbox_showstatic(d);
+  field=dbox_fillin(d);
+  dbox_dispose(&d);
+  if(field==dbox_CLOSE) field=15;
+  }
+checked=field==3;
+return(checked);
+}
+
+os_error *select_topic(int topic,int offset)
+{
+os_error     *e;
+wimp_wstate  state;
+
+film_visible=FALSE;
+wimp_get_wind_state(text_handle,&state);
+if(offset<0) state.o.x=state.o.y=0;
+state.o.behind=-1;
+ERROUT(text_openwindow(&state.o))
+if(/*topic!=dataptr->currenttopic && */topic>=0 && topic<dataptr->sztopics)
+  {
+  dataptr->currenttopic=topic;
+  dataptr->currentwidth=-1;
+  e=text_format(&dataptr,&lineptr,text_handle,-1,offset);
+  if(e)
+    {
+    e=errorgen((int)e);
+    text_closewindow();
+    return(e);
+    }
+  }
+return(NULL);
+}
+
+void losefonts(void)
+{
+int         i;
+h_fontdef   *f;
+
+if(dataptr)
+  {
+  f=(h_fontdef*)((int)dataptr+dataptr->offonts);
+  for(i=0;i<dataptr->szfonts;i++,f++)
+    {
+    if(f->handle>=0) font_lose(f->handle);
+    f->handle=-1;
+    }
+  }
+}
+
+os_error *findfont(char *font,int size,int *handle)
+{
+os_error *e;
+
+e=font_find(font,size,size,180/wimpt_dx(),180/wimpt_dy(),handle);
+if(!e) return(NULL);
+{
+char     message[350];
+
+strcpy(message,font);
+uppercase(message);
+if(!strcmp(message,"TRINITY.MEDIUM")) return(e);
+sprintf(message,msgs_lookup(
+ "badfont:Unable to use font '%s' (%s). Using Trinity.Medium instead."
+                            ),font,e->errmess);
+if(bbc_inkey(-1)) werr(0,message);
+}
+return(findfont("Trinity.Medium",size,handle));
+}
+
+os_error *findfonts(void)
+{
+int         i;
+char        *name;
+h_fontdef   *f;
+char        *p,*e;
+font_info   info;
+
+if(dataptr)
+  {
+  losefonts();
+  f=(h_fontdef*)((int)dataptr+dataptr->offonts);
+  name=(char*)((int)f+dataptr->szfonts*sizeof(h_fontdef));
+  for(i=0;i<dataptr->szfonts;i++,f++)
+    {
+    ERROUT(findfont(name,f->pointsize*16,&f->handle))
+    ERROUT(font_readinfo(f->handle,&info))
+    f->base=info.maxy;
+    f->height=info.maxy-info.miny;
+    name+=strlen(name)+1;
+    }
+  f=(h_fontdef*)((int)dataptr+dataptr->offonts);
+  p=(char*)((int)dataptr+dataptr->oftext);
+  e=(char*)((int)dataptr+rflex_size((flex_ptr)&dataptr));
+  while(p<e)
+    {
+    if(*p==26)
+      {
+      *(p+1)=(f+hex2(p+4))->handle;
+      p+=6;
+      }
+    p++;
+    }
+  }
+return(NULL);
+}
+
+void readpalette(void)
+{
+}
+
+BOOL globalunknown(wimp_eventstr *e,void *handle)
+{
+switch(e->e)
+  {
+  case wimp_ESEND:
+  case wimp_ESENDWANTACK:
+    switch(e->data.msg.hdr.action)
+      {
+      case wimp_MMODECHANGE:
+        wimpt_checkmode();
+        if(wimpt_complain(findfonts()))
+          text_destroy();
+        return(TRUE);
+        break;
+      case wimp_PALETTECHANGE:
+        if(wimpt_complain(findfonts()))
+          text_destroy();
+        readpalette();
+        return(TRUE);
+        break;
+      case wimp_MDATAOPEN:
+        comp_fileload(TRUE);
+        return(TRUE);
+        break;
+      }
+    break;
+  }
+return(FALSE);
+}
+
+void iconbar_eventproc(wimp_eventstr *e,void *handle)
+{
+switch(e->e)
+  {
+  case wimp_ESEND:
+  case wimp_ESENDWANTACK:
+    switch(e->data.msg.hdr.action)
+      {
+      case wimp_MDATASAVE:
+        comp_ramload();
+        break;
+      case wimp_MDATALOAD:
+        comp_fileload(FALSE);
+        break;
+      }
+    break;
+  }
+}
+
+void bariconclickproc(wimp_i icon)
+{
+searchtextclose();
+if(!dataptr)
+  {
+  werr(0,msgs_lookup("NoData: There is no file loaded. You must load a "
+                     "suitable file before you can open the window to "
+                     "read it in."));
+  return;
+  }
+text_showwindow();
+}
+
+void proginfo(void)
+{
+dbox info=NULL;
+
+if(bbc_inkey(-2) && bbc_inkey(-3))
+  {
+  if((info=dbox_new("specialinfo"))!=0);
+    {
+    dbox_setfield(info,5,"Owner:");
+    dbox_setfield(info,6,owner_idstr());
+    dbox_setfield(info,7,"");
+    if(!dataptr)
+      {
+      dbox_setfield(info,8,"No text loaded");
+      dbox_setfield(info,9,"");
+      }
+    else
+      {
+      dbox_setfield(info,8,"This file created by:");
+      dbox_setfield(info,9,dataptr->creator);
+      }
+    dbox_setfield(info,10,"");
+    dbox_setfield(info,11,"");
+    dbox_setfield(info,12,"");
+    }
+  }
+else
+  {
+  if((info=dbox_new("progInfo"))!=0);
+    {
+    char ver[30];
+
+    strcpy(ver,VERSION);
+    if(ver[2]!='0')
+      strcat(ver," ** UNFINISHED **");
+    else
+      if(owner_software_type()==0) strcat(ver," Eval");
+    dbox_setfield(info,1,progname+1);
+    dbox_setfield(info,4,ver);
+    dbox_setfield(info,13,owner_idstr());
+    }
+  }
+if(info)
+  {
+  dbox_show(info);
+  dbox_fillin(info);
+  dbox_dispose(&info);
+  }
+}
+
+menu menumaker_iconbar(void *handle)
+{
+searchtextclose();
+return(m_reader);
+}
+
+void menuproc_iconbar(void *handle,char *hit)
+{
+searchtextclose();
+switch(hit[0])
+  {
+  case 1:
+    proginfo();
+    break;
+  case 2:
+    exit(0);
+    break;
+  }
+}
+
+void checkcache(void)
+{
+int v,u,s;
+
+if(wimpt_complain(font_cacheaddress(&v,&u,&s))) return;
+if(s<=8192) werr(0,msgs_lookup("NoCache:** WARNING ** The font cache is "
+                               "very small. Files will therefore take a "
+                               "very long time to display. You should use "
+                               "the task manager to allocate more font "
+                               "cache before proceeding."));
+}
+
+BOOL initialise(char *progpath)
+{
+int  i;
+
+if(!cli)
+  {
+  os_read_var_val("Obey$Leaf",progname,sizeof(progname));
+  wimpt_init(progname+1);
+  flex_init();
+  res_init(progname+1);
+  resspr_init();
+  template_init();
+  dbox_init();
+  visdelay_init();
+  if(!define_menus()) return(FALSE);
+  baricon("!app",(int)resspr_area(),bariconclickproc);
+  if(!event_attachmenumaker(win_ICONBAR,
+                            menumaker_iconbar,menuproc_iconbar,0))
+    return(FALSE);
+  win_register_event_handler(win_ICONBARLOAD,iconbar_eventproc,0);
+  win_add_unknown_event_processor(globalunknown,0);
+  }
+o_x0=o_y0=o_x1=o_y1=help_provider[0]=0;
+checkcache();
+text_handle=pane_handle=0;
+dataptr=NULL;
+lineptr=NULL;
+for(i=0;i<6;i++) tfonts[i]=-1;
+readpalette();
+msgs_init();
+owner_init(cli?progpath:NULL);
+comp_init();
+return(TRUE);
+}
+
+
+int main(int argc,char *args[])
+{
+cli=argc==3;
+if(initialise(args[0]))
+  {
+  if(argc>1)
+    {
+#if COMPILE
+    if(cli && owner_oktype(2))
+      {
+      os_error   *e;
+      os_filestr f;
+
+      printf("ClearView comand line compiler.\n"
+             " Input file:  %s\n"
+             " Output file: %s\n",args[1],args[2]);
+      e=comp_compile(args[1]);
+      if(e)
+        {
+        puts(e->errmess);
+        return(1);
+        }
+      f.name=args[2];
+      f.action=10;
+      f.loadaddr=OURTYPE;
+      f.start=(int)dataptr;
+      f.end=f.start+rflex_size((flex_ptr)&dataptr);
+      e=os_file(&f);
+      if(e)
+        {
+        puts(e->errmess);
+        return(2);
+        }
+      return(0);
+#endif
+      }
+    if(cli) return(3);
+    if(!wimpt_complain(comp_textload(args[1],FALSE)));
+      text_showwindow();
+    }
+  else
+    {
+    char path[256];
+
+    res_findname("!Help",path);
+    comp_textload(path,FALSE);
+    }
+  while(TRUE)
+    event_process();
+  }
+}

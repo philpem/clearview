@@ -1,0 +1,128 @@
+
+#include "stdio.h"
+#include "string.h"
+
+#include "os.h"
+#include "res.h"
+#include "werr.h"
+#include "msgs.h"
+
+static char owner_owner[30];
+
+char *owner_idstr(void)
+{
+return(owner_owner);
+}
+
+int owner_software_type(void)
+{
+char c=owner_owner[0];
+
+if(c=='A') return(2);
+if(c=='S') return(1);
+return(0);
+}
+
+int owner_licence_type(void)
+{
+char c=owner_owner[1];
+
+if(c=='P') return(0);
+if(c=='1') return(1);
+if(c=='S') return(2);
+return(3);
+}
+
+int owner_oktype(int mintype)
+{
+if(owner_software_type()>=mintype) return(TRUE);
+werr(0,msgs_lookup("Owner:Sorry! This version of the software can't perform the requested function. Upgrade your software and try again!"));
+return(FALSE);
+}
+
+int owner_stringcode(char *s)
+{
+char key[]="© Merlyn Kline, 1991";
+int  value=54615;
+char *k,c;
+
+k=key;
+while(*s)
+  {
+  c=*s++;
+  if(c>='a' && c<='z') c-=32;
+  if(c>32) value=value^(c*(*k++));
+  if(!*k) k=key;
+  }
+return(value);
+}
+
+int owner_atoi(char *s)
+{
+char *p;
+char table[]="BCDFGJKLMPQRSTVWXZ";
+int  o,digit,value;
+
+value=0;
+p=strchr(s,0)-1;
+o=p-s+1;
+while(p>=s)
+  {
+  digit=strchr(table,*p--)-table;
+  digit-=(o--)*7;
+  while(digit<0) digit+=18;
+  value=value*18+digit;
+  }
+return(value);
+}
+
+BOOL owner_validstr(char *s)
+{
+char *p;
+char str[80];
+
+strncpy(str,s,sizeof(str)-1);
+str[sizeof(str)-1]=0;
+p=strchr(str,0)-1;
+while(p>str && (*p==10 || *p==' ')) p--;
+if(p<str || *p!='}') return(FALSE);
+*p--=0;
+while(p>str && *p!='{') p--;
+if(*p!='{') return(FALSE);
+*p++=0;
+return(owner_stringcode(str)==owner_atoi(p));
+}
+
+void owner_init(char *progpath)
+{
+char idpath[500];
+char owner[30];
+FILE *file;
+BOOL success=FALSE;
+
+strcpy(owner_owner,"EX:Bad copy {WFJC}");
+if(progpath)
+  {
+  char *p;
+
+  strcpy(idpath,progpath);
+  p=strchr(idpath,0);
+  while(p>idpath && *p!='.' && *p!=':') p--;
+  if(p>idpath) p++;
+  strcpy(p,"Owner");
+  }
+else
+  res_findname("Owner",idpath);
+file=fopen(idpath,"r");
+*owner=0;
+if(file)
+  {
+  while(!feof(file) && (!*owner || *owner==10 || *owner==';'))
+    fgets(owner,sizeof(owner)-1,file);
+  fclose(file);
+  if(*owner && *owner!=';')
+    success=owner_validstr(owner);
+  }
+if(success)
+  strcpy(owner_owner,owner);
+}

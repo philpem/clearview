@@ -1,0 +1,86 @@
+
+#include "stdlib.h"
+#include "stdarg.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "stdio.h"
+
+#include "os.h"
+#include "wimp.h"
+#include "msgs.h"
+
+#include "Reader.h"
+
+os_error *errorgen(int e)
+{
+/*
+   Create an os_error in a global store with a message indicated by e.
+   If e is >99 then it is a pointer to an existing error to be stored.
+*/
+static os_error error;
+static char *messages[]=
+  {
+  "Insufficient memory. Free some memory and try again.",
+  "Too many font definitions in source file.",
+  "Source file has no topic called 'Index'.",
+  "There is text preceding the first topic identifier.",
+  "There is an illegal command preceding the first topic identifier.",
+  "Picture file is not a recognised type.",
+  "Unable to create dialogue window.",
+  "Too many bookmarks. Please delete one and try again.",
+  "Please give a name for the newbook mark.",
+  "Search failed. The requested text could not be found.",
+  "No printer driver. You must load a printer driver before printing.",
+  "Can't gain access to printer. Free printer driver and try again.",
+  "Unable to render Draw file."
+  };
+
+if(e<99)
+  {
+  char lookup[270];
+
+  sprintf(lookup,"err%02d:%s",e,messages[e]);
+  error.errnum=99;
+  strcpy(error.errmess,msgs_lookup(lookup));
+  }
+else
+  {
+  error.errnum=((os_error*)e)->errnum;
+  strcpy(error.errmess,((os_error*)e)->errmess);
+  }
+return(&error);
+}
+
+os_error *errorgenv(int e, ...)
+{
+va_list     args;
+char lookup[270];
+os_error    error;
+static char *messages[]=
+  {
+  "Unknown command '%s' at location %d.",
+  "Font %d redefined at location %d.",
+  "Illegal font number %d at location %d.",
+  "Topic name '%s' redefined at location %d.",
+  "Index tag '%s' redefined at location %d.",
+  "Index tag '%s' at location %d duplicates topic name.",
+  "Error processing picture '%s': %s",
+  "Illegal picture position '%s' at location %d (use I,L,R or C).",
+  "Illegal tab position '%s' at location %d (use >0 and <150).",
+  "Illegal button '%s' at location %d. Use one word up to 12 characters.",
+  "Illegal font reference '%s' at location %d.",
+  "Definition refers to unknown topic '%s' at location %d.",
+  "Cross reference to unknown index tag '%s' at location %d.",
+  "File '%s' not found.",
+  "File '%s' is a directory."
+  "Font %d at location %d should have a size in the range 4 to 99.",
+  };
+
+va_start(args,e);
+sprintf(lookup,"errv%02d:%s",e,messages[e]);
+vsprintf(error.errmess,msgs_lookup(lookup),args);
+error.errnum=99;
+va_end(args);
+return(errorgen((int)&error));
+}

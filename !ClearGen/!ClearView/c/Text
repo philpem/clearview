@@ -1,0 +1,1086 @@
+#include "stdlib.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "stdio.h"
+
+#include "os.h"
+#include "swis.h"
+#include "win.h"
+#include "wimp.h"
+#include "wimpt.h"
+#include "resspr.h"
+#include "template.h"
+#include "res.h"
+#include "dbox.h"
+#include "event.h"
+#include "msgs.h"
+#include "baricon.h"
+#include "coords.h"
+#include "flex.h"
+#include "drawfdiag.h"
+#include "font.h"
+#include "colourtran.h"
+#include "saveas.h"
+#include "print.h"
+
+#include "Reader.h"
+#include "Menus.h"
+#include "Owner.h"
+
+#define FILETYPE_DRAW 0xaff
+#define FILETYPE_SPRITE 0xff9
+#define FILETYPE_FILM 0xd6a
+#define Euclid_Expand 0x80654
+
+static int  idlereason=0;
+
+os_error *project_next_frame(int *p)
+{
+sprite_area *sa;
+os_error    *e=NULL;
+int         *info;
+int         r0,r3;
+int         s0,s1,s2,s3;
+int         ptr,screen;
+
+info=(int*)((int)p+*p);
+ptr=*info+(int)p;
+screen=*(info+1);
+if(screen) screen+=(int)p;
+if(*(int*)ptr==0) {ptr=(int)p+*(p+4); screen=0;}
+sa=(sprite_area*)((int)p+*p+8);
+e=os_swi4r(OS_SpriteOp|XOS_Bit,0x23c,(int)sa,(int)sa+sa->sproff,0,
+                               &s0,&s1,&s2,&s3);
+if(!e) e=os_swi4r(Euclid_Expand|os_X,
+                  *(p+8),ptr,screen,*(p+10),&r0,&ptr,&screen,&r3);
+if(((*(p+9))&3)==0) screen=0;
+os_swi4(OS_SpriteOp|XOS_Bit,s0,s1,s2,s3);
+if(!e)
+  {
+  *info=ptr-(int)p;
+  *(info+1)=screen-(screen?(int)p:0);
+  }
+else
+  {
+  *(info)=*(p+4);
+  *(info+1)=0;
+  }
+return(e);
+}
+
+int ofendtopic(void)
+{
+h_topicdef *p;
+
+if(dataptr->currenttopic>=dataptr->sztopics-1)
+  return(rflex_size((flex_ptr)&dataptr));
+p=(h_topicdef*)((int)dataptr+dataptr->oftopics);
+p+=dataptr->currenttopic+1;
+return(p->offset-1);
+}
+
+void text_noidle(void)
+{
+if(!film_visible)
+  {
+  win_claim_idle_events(-1);
+  event_setmask(event_getmask()|wimp_EMNULL);
+  }
+idlereason=0;
+}
+
+os_error *text_closewindow(void)
+{
+os_error *e,*e1;
+
+e=NULL;
+film_visible=FALSE;
+text_noidle();
+searchtextclose();
+if(text_handle)
+  {
+  e=wimp_close_wind(text_handle);
+  e1=wimp_delete_wind(text_handle);
+  if(!e) e=e1;
+  win_register_event_handler(text_handle,NULL,0);
+  }
+text_handle=0;
+pane_closewindow();
+if(lineptr) rflex_free((flex_ptr)&lineptr);
+return(e);
+}
+
+os_error *text_openwindow(wimp_openstr *o)
+{
+os_error      *e;
+wimp_wstate   state;
+
+e=wimp_get_wind_state(text_handle,&state);
+if(!e)
+  {
+  pane_open_near(o);
+  o->behind=pane_handle;
+  e=wimp_open_wind(o);
+  }
+if(!e) e=wimp_get_wind_state(text_handle,&state);
+if(!e) e=pane_open_near(&state.o);
+if(!e)
+  {
+  event_setmask(event_getmask()&~wimp_EMNULL);
+  win_claim_idle_events(text_handle);
+  idlereason=1;
+  }
+return(e);
+}
+
+os_error *setcol(int gcol,int rgb,BOOL printing)
+{
+if(printing)
+  {
+  wimp_paletteword pw;
+  int              temp;
+
+  pw.word=rgb;
+  ERROUT(colourtran_setGCOL(pw,gcol&128,0,&temp));
+  }
+else
+  ERROUT(wimp_setcolour(gcol));
+return(NULL);
+}
+
+os_error *draw_pic(text_header *ptr,int offset,int x,int y,int *linewidth,
+                   wimp_redrawstr *r,BOOL printing)
+{
+int        ofpic,width;
+h_pictdef  *ppic;
+char       *s,*picdata;
+static int defaultpal[]={0xffffff00,0xdddddd00,0xbbbbbb00,0x99999900,
+                         0x77777700,0x55555500,0x33333300,0x00000000,
+                         0x99440000,0x00eeee00,0x00cc0000,0x0000dd00,
+                         0xbbeeee00,0x00885500,0x00bbff00,0xffbb0000};
+
+width=*linewidth;
+ofpic=0;
+s=((char*)ptr)+offset;
+switch(*s)
+  {
+  case 'P':
+    ofpic=hex6(s+5);
+    ppic=(h_pictdef*)(((int)ptr)+ofpic);
+    y+=ppic->height;
+    break;
+  case 'Q':
+    y-=PICMAR;
+    ofpic=hex6(s+9);
+    break;
+  case 'R':
+    y-=PICMAR;
+    ofpic=hex6(s+9);
+    ppic=(h_pictdef*)(((int)ptr)+ofpic);
+    x=x+width-ppic->width;
+    break;
+  case 'S':
+    y-=PICMAR;
+    ofpic=hex6(s+9);
+    ppic=(h_pictdef*)(((int)ptr)+ofpic);
+    x=x+(width-ppic->width)/2;
+    break;
+  }
+ppic=(h_pictdef*)(((int)ptr)+ofpic);
+*linewidth-=ppic->width+PICMAR;
+picdata=(char*)(((int)ptr)+ppic->offset);
+if(x<=r->g.x1 && x+ppic->width>=r->g.x0)
+  switch(ppic->type)
+    {
+    case FILETYPE_DRAW:
+      {
+      draw_diag      diag;
+      draw_redrawstr d;
+      draw_error     e;
+
+      d=*(draw_redrawstr*)r;
+      d.scx=d.scy=0;
+      d.box.y1=y-ppic->height;
+      d.box.x0=x;
+      diag.length=ppic->size;
+      diag.data=picdata;
+      ERROUT(setcol(0,0xFFFFFF00,printing));
+      ERROUT(bbc_rectanglefill(x,y,ppic->width,-ppic->height));
+      ERROUT(setcol(7,0,printing));
+      ERROUT(bbc_rectangle(x,y,ppic->width,-ppic->height));
+      if(!draw_render_diag(&diag,&d,1,&e))
+        {
+        if(e.type==DrawOwnError)
+          return(errorgen(12));
+        else
+          return(errorgen((int)&e.err.os));
+        }
+      }
+      break;
+    case FILETYPE_SPRITE:
+      {
+      sprite_area     *area;
+      sprite_id       sprite;
+      sprite_factors  factors;
+      sprite_pixtrans pixtrans[256];
+      int             spdx,spdy,spbpp,spmode;
+      int             pal[16],i;
+      int             *p;
+
+      area=(sprite_area*)(picdata-4);
+      sprite.tag=sprite_id_addr;
+      sprite.s.addr=(sprite_ptr)((int)area+area->sproff);
+      spmode=((sprite_header*)sprite.s.addr)->mode;
+      spdx=1<<bbc_modevar(spmode,4);
+      spdy=1<<bbc_modevar(spmode,5);
+      spbpp=1<<bbc_modevar(spmode,9);
+      factors.xmag=spdx;
+      factors.xdiv=wimpt_dx();
+      factors.ymag=spdy;
+      factors.ydiv=wimpt_dy();
+      p=(int*)((int)sprite.s.addr+32);
+      if(*p!=0x2c)
+        {
+        p+=3;
+        for(i=0;i<16;i++)
+          {
+          pal[i]=(*p)&0xffffff00;
+          p+=2;
+          }
+        p=pal;
+        }
+      else
+        p=spbpp==4?defaultpal:0;
+      ERROUT(colourtran_select_table(spmode,(wimp_paletteword*)p,
+                              -1,(wimp_paletteword*)-1,(void*)pixtrans));
+      ERROUT(sprite_put_scaled(area,&sprite,8,x,
+                               y-ppic->height,&factors,pixtrans));
+      }
+      break;
+    case FILETYPE_FILM:
+      {
+      sprite_area     *area;
+      sprite_id       sprite;
+      sprite_factors  factors;
+      sprite_pixtrans pixtrans[256];
+      int             spdx,spdy,spbpp,spmode;
+      int             *p,*film;
+
+      film=(int*)picdata;
+      area=(sprite_area*)((int)film+*film+8);
+      sprite.tag=sprite_id_addr;
+      sprite.s.addr=(sprite_ptr)((int)area+area->sproff);
+      spmode=((sprite_header*)sprite.s.addr)->mode;
+      spdx=1<<bbc_modevar(spmode,4);
+      spdy=1<<bbc_modevar(spmode,5);
+      spbpp=1<<bbc_modevar(spmode,9);
+      if(spdx==wimpt_dx() && spdy==wimpt_dy() && spbpp==wimpt_bpp()
+         && !printing)
+        {
+        sprite_put_given(area,&sprite,8,x,y-ppic->height);
+        }
+      else
+        {
+        factors.xmag=spdx;
+        factors.xdiv=wimpt_dx();
+        factors.ymag=spdy;
+        factors.ydiv=wimpt_dy();
+        p=spbpp==4?defaultpal:0;
+        ERROUT(colourtran_select_table(spmode,(wimp_paletteword*)p,
+                                -1,(wimp_paletteword*)-1,(void*)pixtrans));
+        ERROUT(sprite_put_scaled(area,&sprite,8,x,
+                                 y-ppic->height,&factors,pixtrans));
+        }
+      film_visible=TRUE;
+      }
+      break;
+    default:
+      ERROUT(setcol(11,0x0000FF00,printing));
+      ERROUT(bbc_rectanglefill(x,y,ppic->width,-ppic->height));
+      ERROUT(setcol(7,0,printing));
+      ERROUT(bbc_rectangle(x,y,ppic->width,-ppic->height));
+    }
+return(NULL);
+}
+
+os_error *text_button(int x,int y,int w,int h,BOOL printing)
+{
+x&=~(wimpt_dx()-1);
+y&=~(wimpt_dy()-1);
+ERROUT(setcol(7,0,printing));
+ERROUT(bbc_rectanglefill(x,y,w-1,3));
+ERROUT(bbc_rectanglefill(x,y,3,h-1));
+ERROUT(bbc_rectanglefill(x+w-4,y,3,h-1));
+ERROUT(bbc_rectanglefill(x,y+h-4,w-1,3));
+ERROUT(setcol(0,0xFFFFFF00,printing));
+ERROUT(bbc_rectanglefill(x+4,y+4,3,h-9));
+ERROUT(bbc_rectanglefill(x+8,y+h-8,w-13,3));
+ERROUT(setcol(4,0xAAAAAA00,printing));
+ERROUT(bbc_rectanglefill(x+6,y+4,1,1));
+ERROUT(bbc_rectanglefill(x+8,y+4,w-13,3));
+ERROUT(bbc_rectanglefill(x+w-8,y+4,3,h-13));
+ERROUT(bbc_rectanglefill(x+w-6,y+h-8,1,1));
+ERROUT(setcol(7,0,printing));
+return(NULL);
+}
+
+os_error *osbyte1(int a,int x,int y)
+{
+return(os_byte(a,&x,&y));
+}
+
+os_error *text_draw(wimp_redrawstr *r,BOOL filmupdate,linestr **plptr,
+               int wid,int print)
+{
+BOOL          more=TRUE;
+coords_cvtstr c;
+int           top,bottom,line,lines,y;
+h_fontdef     *f;
+char          *end,termchar,*pline;
+linestr       *lptr;
+static char   stxref[]={25,USXREFPOS,USXREFSIZE};
+static char   stdef[]={25,USDEFPOS,USDEFSIZE};
+char          buf[512];
+BOOL          firstline=TRUE;
+
+lptr=*plptr;
+if(!lptr) return(NULL);
+c.box=r->box;
+c.scx=r->scx;
+c.scy=r->scy;
+lines=rflex_size((flex_ptr)plptr)/sizeof(linestr);
+f=(h_fontdef*)((int)dataptr+dataptr->offonts);
+while(more)
+  {
+  if(!filmupdate)
+    {
+    if(wimpt_bpp()==1 && !print)
+      wimp_setcolour(128);
+    else
+      wimp_setcolour(129);
+    bbc_clg();
+    }
+  top=coords_y_toworkarea(r->g.y1,&c);
+  bottom=coords_y_toworkarea(r->g.y0,&c);
+  y=-PICMAR-(print==0?PANEHEIGHT:0)-1;
+  line=0;
+  while(line<lines-1 && y-(lptr+line)->height>top)
+    {
+    y-=(lptr+line)->height;
+    line++;
+    }
+  if(line<lines)
+    {
+    linestr *l=lptr+line;
+    int     sx,sy,linewid,rulewid,lineheight;
+
+    linewid=wid;
+    sy=coords_y_toscreen(y,&c);
+    sx=coords_x_toscreen(PICMAR,&c);
+    if((l->flags&(LF_PIC|LF_PICCONT))==LF_PICCONT)
+      {
+      int  y1=sy;
+
+      while(!(l->flags&LF_PIC))
+         {
+         l--;
+         y1+=l->height;
+         }
+      ERROUT(draw_pic(dataptr,l->offset+1,sx,y1,&linewid,r,print!=0));
+      l=lptr+line;
+      }
+    while(line<lines && y>=bottom)
+      {
+      rulewid=linewid;
+      lineheight=l->height;
+      if((l->flags&(LF_PICCONT|LF_PIC))!=LF_PICCONT)
+        linewid=wid;
+      if((l->flags&LF_PIC) && print)
+        {
+        int       ofpic;
+        h_pictdef *ppic;
+
+        ofpic=hex6(((char*)dataptr)+l->offset+1+9);
+        ppic=(h_pictdef*)(((int)dataptr)+ofpic);
+        lineheight=ppic->height+PICMAR*2;
+        }
+      if(print && y-lineheight<print && !firstline)
+        {
+        int ident;
+
+        while(more)
+          ERROUT(print_getrectangle((print_box*)&r->g,&more,&ident));
+        r->scy=y;
+        return(NULL);
+        }
+      if(l->flags&LF_PIC)
+        ERROUT(draw_pic(dataptr,l->offset+1,sx,sy,&linewid,r,print!=0));
+      if(l->flags&(LF_RULE|LF_RULE2))
+        {
+        ERROUT(setcol(7,0,print));
+        ERROUT(bbc_move(sx+l->lmar,sy));
+        ERROUT(bbc_drawby(rulewid,0));
+        }
+      if(l->flags&LF_RULE1)
+        {
+        int w=rulewid;
+
+        ERROUT(setcol(7,0,print));
+        ERROUT(bbc_move(sx+l->lmar,sy));
+        while(w>0)
+          {
+          bbc_drawby(4,0);
+          bbc_moveby(12,0);
+          w-=16;
+          }
+        }
+      if(l->flags&LF_RULE2)
+        {
+        ERROUT(setcol(7,0,print));
+        ERROUT(bbc_move(sx+l->lmar,sy-8));
+        ERROUT(bbc_drawby(rulewid,0));
+        }
+      if(line==lines-1)
+        end=((char*)dataptr)+ofendtopic();
+      else
+        end=((char*)dataptr)+(l+1)->offset;
+      termchar=*end;
+      *end=0;
+      if((l->flags)&(LF_IPIC|LF_KEY))
+        {
+        char *p;
+        int  o,cfont;
+
+        cfont=l->flags&LF_FONT;
+        for(o=l->offset,p=(char*)dataptr+l->offset;p<end-16;o++,p++)
+          {
+          if(*p==9 && *(p+4)==21 && *(p+5)=='P')
+            {
+            font_string fs;
+            int         px,py,temp;
+
+            ERROUT(font_setfont((f+(l->flags&LF_FONT))->handle));
+            fs.x=fs.y=10000000;
+            fs.s=(char*)dataptr+l->offset;
+            fs.split=-1;
+            fs.term=o-l->offset;
+            ERROUT(font_strwidth(&fs));
+            ERROUT(font_converttoos(fs.x,fs.y,&px,&py));
+            temp=wid;
+            ERROUT(draw_pic(dataptr,o+5,sx+l->lmar+px,sy-l->base,
+                            &temp,r,print!=0));
+            p+=15;
+            o+=15;
+            }
+          else
+            if(*p==21 && *(p+1)=='K')
+              {
+              char        *p1=p;
+              int         s,e,bx,by,ex,ey;
+              font_string fs;
+              h_fontdef   *fd;
+
+              s=e=o-l->offset;
+              while(*p1!=21 || *(p1+1)!='L' || *(p1+2))
+                {
+                p1++;
+                e++;
+                }
+              ERROUT(font_setfont((f+(l->flags&LF_FONT))->handle));
+              fs.x=fs.y=10000000;
+              fs.s=(char*)dataptr+l->offset;
+              fs.split=-1;
+              fs.term=s;
+              ERROUT(font_strwidth(&fs));
+              ERROUT(font_converttoos(fs.x,fs.y,&bx,&by));
+              fd=f+cfont;
+              ERROUT(font_setfont(fd->handle));
+              fs.x=fs.y=10000000;
+              fs.s=(char*)dataptr+l->offset+s;
+              fs.split=-1;
+              fs.term=e-s;
+              ERROUT(font_strwidth(&fs));
+              ERROUT(font_converttoos(fs.x,fs.y,&ex,&ey));
+              bx+=sx+l->lmar;
+              by=sy-l->base-(fd->height-fd->base);
+              ey=fd->height;
+              if(bx<=r->g.x1 && bx+ex>=r->g.x0)
+                ERROUT(text_button(bx,by,ex,ey,print!=0));
+              }
+            else
+              if(*p==21 && *(p+1)=='F')
+                cfont=hex2(p+2);
+          }
+        }
+      if(!print) 
+        {
+        ERROUT(wimp_setfontcolours(7,1));
+        }
+      else
+        {
+        int i;
+        wimp_paletteword fg,bg;
+        int              o;
+
+        for(i=0;i<dataptr->szfonts;i++)
+          {
+          o=14;
+          fg.word=0;
+          bg.word=0xFFFFFF00;
+          colourtran_setfontcolours(&(f+i)->handle,&bg,&fg,&o);
+          }
+        }
+      ERROUT(font_setfont((f+(l->flags&LF_FONT))->handle));
+      pline=(char*)dataptr+l->offset;
+      if(l->flags&(LF_STXREF|LF_STDEF))
+        {
+        char *t;
+
+        if(l->flags&LF_STDEF)
+          {
+          memcpy(buf,stdef,sizeof(stdef));
+          t=buf+sizeof(stdef);
+          }
+        else
+          {
+          memcpy(buf,stxref,sizeof(stxref));
+          t=buf+sizeof(stxref);
+          }
+        memcpy(t,pline,end-pline+1);
+        pline=buf;
+        }
+      ERROUT(font_paint(pline,font_OSCOORDS,sx+l->lmar,sy-l->base));
+      *end=termchar;
+      y-=l->height;
+      sy-=l->height;
+      l++;
+      line++;
+      firstline=FALSE;
+      }
+    }
+  if(print)
+    {
+    int ident;
+
+    ERROUT(print_getrectangle((print_box*)&r->g,&more,&ident));
+    }
+  else
+    wimp_get_rectangle(r,&more);
+  }
+if(print) r->scy=1;
+return(NULL);
+}
+
+void text_redraw(void)
+{
+wimp_redrawstr r;
+BOOL           more;
+
+wimpt_checkmode();
+r.w=text_handle;
+wimp_redraw_wind(&r,&more);
+if(more)
+  if(text_draw(&r,FALSE,&lineptr,dataptr->currentwidth,FALSE))
+    while(more) wimp_get_rectangle(&r,&more);
+}
+
+void text_update(wimp_redrawstr *r)
+{
+BOOL  more;
+
+wimpt_checkmode();
+r->w=text_handle;
+wimp_update_wind(r,&more);
+if(more) text_draw(r,FALSE,&lineptr,dataptr->currentwidth,FALSE);
+}
+
+void update_films()
+{
+linestr        *line;
+h_pictdef      *ppic;
+int            i,*p,count,lines;
+char           *s;
+wimp_redrawstr r;
+BOOL           more;
+
+wimpt_checkmode();
+if(!lineptr) return;
+i=PICMAR+PANEHEIGHT+1;
+line=lineptr;
+lines=rflex_size((flex_ptr)&lineptr)/sizeof(linestr);
+count=0;
+while(count<lines)
+  {
+  line=lineptr+count;
+  if(line->flags&LF_PIC)
+    {
+    s=(char*)dataptr+line->offset+1;
+    ppic=(h_pictdef*)(((int)dataptr)+hex6(s+9));
+    if(ppic->type==FILETYPE_FILM)
+      {
+      p=(int*)((int)dataptr+ppic->offset);
+      project_next_frame(p);
+      r.w=text_handle;
+      r.box.x0=PICMAR;
+      switch(*s)
+        {
+        case 'R': r.box.x0+=dataptr->currentwidth-ppic->width; break;
+        case 'S': r.box.x0+=(dataptr->currentwidth-ppic->width)/2; break;
+        }
+      r.box.x1=r.box.x0+ppic->width;
+      r.box.y1=-i-PICMAR;
+      r.box.y0=r.box.y1-ppic->height;
+      wimp_update_wind(&r,&more);
+      if(more) text_draw(&r,TRUE,&lineptr,dataptr->currentwidth,FALSE);
+      line=lineptr+count;
+      }
+    }
+  if(line->flags&LF_IPIC)
+    {
+    int end,o=0;
+
+    if(count==lines-1)
+      end=ofendtopic();
+    else
+      end=(line+1)->offset;
+    end-=line->offset+15;
+    s=(char*)dataptr+line->offset;
+    while(*s && o<end)
+      {
+      s=(char*)dataptr+line->offset+o;
+      switch(*s)
+        {
+        case 9: 
+          if(*(s+4)==21 && *(s+5)=='P')
+            {
+            font_string fs;
+            int         px,py;
+            h_fontdef   *f;
+
+            f=(h_fontdef*)((int)dataptr+dataptr->offonts);
+            font_setfont((f+(line->flags&LF_FONT))->handle);
+            fs.x=fs.y=10000000;
+            fs.s=(char*)dataptr+line->offset;
+            fs.split=-1;
+            fs.term=s-fs.s;
+            font_strwidth(&fs);
+            font_converttoos(fs.x,fs.y,&px,&py);
+            ppic=(h_pictdef*)(((int)dataptr)+hex6(s+10));
+            if(ppic->type==FILETYPE_FILM)
+              {
+              int *p;
+
+              p=(int*)((int)dataptr+ppic->offset);
+              project_next_frame(p);
+              r.w=text_handle;
+              r.box.x0=PICMAR+line->lmar+px;
+              r.box.x1=r.box.x0+ppic->width;
+              r.box.y0=-i-line->base;
+              r.box.y1=r.box.y0+ppic->height;
+              wimp_update_wind(&r,&more);
+              if(more)
+                text_draw(&r,TRUE,&lineptr,dataptr->currentwidth,FALSE);
+              }
+            }
+          o+=3;
+          break;
+        case 26: o++;  break;
+        case 25: o+=2; break;
+        case 21: do {s++; o++;} while(*s>31); break;
+        default: break;
+        }
+      o++;
+      }
+    }
+  i+=line->height;
+  count++;
+  }
+}
+
+void text_goto1(int offset)
+{
+int         i;
+h_topicdef  *topicp,*topicp1;
+linestr     *line;
+wimp_wstate state;
+
+i=0;
+topicp1=(h_topicdef*)((int)dataptr+dataptr->oftopics);
+topicp=topicp1+1;
+while(i<dataptr->sztopics && topicp->offset<=offset)
+  {
+  i++;
+  topicp++;
+  }
+if(topicp->offset>offset) topicp--;
+i=topicp-topicp1;
+if(i!=dataptr->currenttopic || !lineptr)
+  select_topic(i,offset);
+else
+  {
+  i=PICMAR;
+  line=lineptr;
+  while(offset>=line->offset)
+    {
+    i+=line->height;
+    line++;
+    }
+  i-=(--line)->height;
+  if(i<=PICMAR+PANEHEIGHT) i=0;
+  wimp_get_wind_state(text_handle,&state);
+  state.o.y=-i;
+  text_openwindow(&state.o);
+  }
+}
+
+void text_goto(int offset)
+{
+queue_storepos();
+text_goto1(offset);
+}
+
+
+void text_eventproc(wimp_eventstr *e,void *handle)
+{
+static int counter=0;
+
+switch(e->e)
+  {
+  case wimp_ENULL:
+    update_films();
+    switch(idlereason)
+      {
+      case 1:
+        counter++;
+        if(counter>=1)
+          {
+          wimp_wstate state;
+          linestr     *l=lineptr;
+
+          wimp_get_wind_state(text_handle,&state);
+          if(state.o.y)
+            {
+            state.o.y+=PICMAR+PANEHEIGHT;
+            while(state.o.y+l->height<0)
+              {
+              state.o.y+=l->height;
+              l++;
+              }
+            }
+          if(wimpt_complain(
+                 text_format(&dataptr,&lineptr,text_handle,-1,l->offset)))
+            text_closewindow();
+          counter=0;
+          text_noidle();
+          }
+        break;
+      case 2:
+        {
+        wimp_mousestr  m;
+
+        wimp_get_point_info(&m);
+        if(m.w!=text_handle || m.i<0)
+          {
+          os_cli("Pointer 1");
+          text_noidle();
+          }
+        }
+        break;
+      }
+    break;
+  case wimp_EREDRAW:
+    text_redraw();
+    break;
+  case wimp_EOPEN:
+    wimpt_complain(text_openwindow(&(e->data.o)));
+    break;
+  case wimp_ECLOSE:
+    wimpt_complain(text_closewindow());
+    break;
+  case wimp_EBUT:
+    searchtextclose();
+    if(e->data.but.m.i>=0 && (e->data.but.m.bbits&5)==0)
+      {
+      if(idlereason==0)
+        {
+        os_regset r;
+
+        r.r[0]=36+256;
+        r.r[1]=(int)resspr_area();
+        r.r[2]=(int)"ptr_link";
+        r.r[3]=2;
+        r.r[4]=r.r[5]=2;
+        r.r[6]=r.r[7]=0;
+        os_swix(OS_SpriteOp|XOS_Bit,&r);
+        event_setmask(event_getmask()&~wimp_EMNULL);
+        win_claim_idle_events(text_handle);
+        idlereason=2;
+        }
+      update_films();
+      }
+    if(e->data.but.m.i>=0 && (e->data.but.m.bbits&5))
+      {
+      wimp_icon icon;
+
+      os_cli("Pointer 1");
+      text_noidle();
+      wimp_get_icon_info(e->data.but.m.w,e->data.but.m.i,&icon);
+      if(icon.data.text[0]=='D')
+        {
+        /* ;{{ here should display topic in sub-window */
+        int        topicn;
+        h_topicdef *topicp;
+
+        bbc_vdu(7);
+        topicn=hex4(icon.data.text+1);
+        topicp=(h_topicdef*)((int)dataptr+dataptr->oftopics);
+        topicp+=topicn;
+        text_goto(topicp->offset);
+        }
+      else
+        {
+        int        indexn;
+        h_indexdef *indexp;
+
+        indexn=hex4(icon.data.text+1);
+        indexp=(h_indexdef*)((int)dataptr+dataptr->ofindex);
+        indexp+=indexn;
+        text_goto(indexp->offset);
+        }
+      pane_greyicons();
+      }
+    break;
+  case wimp_ESEND:
+  case wimp_ESENDWANTACK:
+    switch(e->data.msg.hdr.action)
+      {
+      case wimp_MDATASAVE:
+        comp_ramload();
+        break;
+      case wimp_MDATALOAD:
+        comp_fileload(FALSE);
+        break;
+      }
+    break;
+  }
+}
+
+void text_settitle(void)
+{
+char title[260];
+
+if(text_handle)
+  {
+  if(help_provider[0])
+    strcpy(title,help_provider);
+  else
+    {
+    if(eversaved)
+      strcpy(title,pathname);
+    else
+      strcpy(title,msgs_lookup("noname:<Untitled>"));
+    if(modified)
+      strcat(title," *");
+    }
+  win_settitle(text_handle,title);
+  }
+}
+
+BOOL text_savefile(char *filename,void *handle)
+{
+os_error   *e;
+os_filestr f;
+
+f.name=filename;
+f.action=10;
+f.loadaddr=OURTYPE;
+f.start=(int)dataptr;
+f.end=f.start+rflex_size((flex_ptr)&dataptr);
+wimpt_complain(e=os_file(&f));
+if(!e)
+  {
+  strncpy(pathname,filename,255);
+  modified=FALSE;
+  eversaved=TRUE;
+  text_settitle();
+  }
+return(e==NULL);
+}
+
+os_error *text_print(void)
+{
+dbox          d;
+int           i,copies,thistopic;
+print_infostr p;
+char          desc[22];
+
+d=dbox_new("printerInfo");
+if(print_info(&p))
+  strcpy(desc,msgs_lookup("NoDrive:Not Present"));
+else
+  strcpy(desc,p.description);
+if(!d) return(errorgen(6));
+dbox_setfield(d,0,desc);
+dbox_show(d);
+i=dbox_fillin(d);
+copies=dbox_getnumeric(d,2);
+thistopic=dbox_getnumeric(d,4);
+dbox_dispose(&d);
+if(i==3 && owner_oktype(1)) return(printtext(copies,thistopic));
+return(NULL);
+}
+
+menu text_mmaker(void *handle)
+{
+searchtextclose();
+menu_setflags(m_tools,MO_TOOLS_NEXTTOPIC,FALSE,
+              dataptr->currenttopic==dataptr->sztopics-1);
+menu_setflags(m_tools,MO_TOOLS_PREVTOPIC,FALSE,dataptr->currenttopic==0);
+menu_setflags(m_tools,MO_TOOLS_BACKTRACE,FALSE,queue_isempty());
+menu_setflags(m_tools,MO_TOOLS_SEARCH,FALSE,FALSE);
+/*
+menu_setflags(m_tools,MO_TOOLS_ANNOTATE,FALSE,FALSE);
+*/
+menu_setflags(m_tools,MO_TOOLS_BOOKMARK,FALSE,FALSE);
+menu_setflags(m_tools,MO_TOOLS_INDEX,
+              dataptr->currenttopic==dataptr->indextopic,FALSE);
+return(m_reader1);
+}
+
+void text_mproc(void *handle,char *hit)
+{
+os_error *e=NULL;
+
+switch(hit[0])
+  {
+  case MO_READER_SAVE:
+    if(owner_oktype(1))
+      saveas(OURTYPE,pathname,rflex_size((flex_ptr)&dataptr),text_savefile,
+           NULL,NULL,NULL);
+    break;
+  case MO_READER_PRINT:
+    e=text_print();
+    break;
+  case MO_READER_TOOLS:
+    switch(hit[1])
+      {
+      case MO_TOOLS_NEXTTOPIC:
+        queue_storepos();
+        e=select_topic(dataptr->currenttopic+1,-1);
+        break;
+      case MO_TOOLS_PREVTOPIC:
+        queue_storepos();
+        e=select_topic(dataptr->currenttopic-1,-1);
+        break;
+      case MO_TOOLS_BACKTRACE:
+        queue_backstep();
+        break;
+      case MO_TOOLS_SEARCH:
+        e=searchtext();
+        break;
+/*
+      case MO_TOOLS_ANNOTATE:
+        break;
+*/
+      case MO_TOOLS_BOOKMARK:
+        e=bookmark();
+        break;
+      case MO_TOOLS_INDEX:
+        queue_storepos();
+        e=select_topic(dataptr->indextopic,-1);
+        break;
+      }
+    pane_greyicons();
+    break;
+  }
+wimpt_complain(e);
+}
+
+os_error *text_displaywindow(void)
+{
+wimp_wind   *window;
+wimp_wstate state;
+os_error    *e;
+BOOL        new;
+
+new=FALSE;
+e=NULL;
+if(!text_handle)
+  {
+  window=template_syshandle("text");
+  if(!window) return(errorgen(0));
+  e=wimp_create_wind(window,&text_handle);
+  if(!e)
+    {
+    win_register_event_handler(text_handle,text_eventproc,0);
+    window=template_syshandle("tools");
+    if(!window) e=errorgen(0);
+    if(!e) e=wimp_create_wind(window,&pane_handle);
+    if(!e) win_register_event_handler(pane_handle,pane_eventproc,0);
+    if(!e) event_attachmenumaker(text_handle,text_mmaker,text_mproc,0);
+    text_settitle();
+    new=TRUE;
+    }
+  }
+if(!e)
+  {
+  wimp_get_wind_state(text_handle,&state);
+  state.o.behind=-1;
+  if(new)
+    {
+    int width;
+
+    width=dataptr->minwidth+PICMAR*2;
+    if(state.o.box.x1-state.o.box.x0<width)
+      state.o.box.x1=state.o.box.x0+width;
+    }
+  if(o_x0!=o_x1 && o_y0!=o_y1)
+    {
+    if(new || o_x0<o_x1)
+      {
+      int t;
+
+      if(o_x0>o_x1) {t=o_x0; o_x0=o_x1; o_x1=t;}
+      if(o_y0>o_y1) {t=o_y0; o_y0=o_y1; o_y1=t;}
+      state.o.box.x0=o_x0;
+      state.o.box.y0=o_y0;
+      state.o.box.x1=o_x1;
+      state.o.box.y1=o_y1;
+      }
+    o_x0=o_x1=o_y0=o_y1=0;
+    }
+  e=text_openwindow(&state.o);
+  if((new || dataptr->currenttopic<0) && !e)
+    {
+    int topic=dataptr->currenttopic;
+
+    if(topic<0) topic=0;
+    e=wimpt_complain(select_topic(topic,-1));
+    }
+  }
+if(e) text_closewindow();
+return(e);
+}
+
+void text_showwindow(void)
+{
+static BOOL checkingev=FALSE;
+BOOL        checkev;
+
+if(checkingev) return;
+checkingev=TRUE;
+checkev=checkeval();
+checkingev=FALSE;
+if(!checkev) return;
+if(!wimpt_complain(text_displaywindow()))
+  pane_greyicons();
+}
+
+void text_destroy(void)
+{
+if(!cli) text_closewindow();
+if(!cli) losefonts();
+queue_empty();
+if(dataptr) rflex_free((flex_ptr)&dataptr);
+}

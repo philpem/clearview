@@ -1,0 +1,4 @@
+{topic:dummy file for testing}{rule:1}
+{picture:i,adfs::Merlyns.$.Apps.Tween.Film1}Hello {picture:i,adfs::Merlyns.$.Apps.Tween.Film12}This is some dummy text in a file which can be used to  quickly test different features of the compiler etc.
+{topic:index}
+

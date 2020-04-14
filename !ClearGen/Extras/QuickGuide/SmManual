@@ -1,0 +1,85 @@
+{Font:1,Homerton.Medium,20
+{Font:2,Homerton.Medium,16
+{Font:3,Homerton.Medium.Oblique,12
+{Font:4,Corpus.Medium,14
+{Font:5,Homerton.Medium,14
+{F:1}{topic:Text Commands} {Picture:I,cvlogo}{F:0}{Rule:0}{Picture:R,Logo}
+This is a very {index:Short Document}short document to show the structure of a ClearView source text file. It has two topics: Text Commands and Picture Commands.
+
+{Index:Topic Command}TOPICS
+Notice that a topic or if you prefer a chapter command is simply the command {F:4}{{}Topic:Text#}{F:0}. See the example above. Note that ALL documents must contain at least one main topic AND a topic at the end called Index.
+
+{index:Font Command}FONTS
+The fonts that are to be used are declared at the start of the file as shown above with the command {F:4}{{}Font:n,font name,point size}{F:0}. The commas are important in the command. Use numbers between one and ten to number the font. The full font name should be entered eg. Homerton.Bold.Oblique
+
+The point size should be declared after the font name. Take account that point sizes will be larger in ClearView than they would generally be if printed to ensure that they are clear to read on the monitor.
+
+{index:F: Command}THE F: COMMAND
+This command is used before a piece of text to change it to the numbered font style. For example {F:3}this is Homerton.Medium.Oblique which is Font:3{F:0}. Note that the {F:4}F:{f:0} command before a topic can be in the form {F:4}{{}F:000000000000number}{f:0} - this is a convenient form that allows you to see the start of a topic on the screen while writing the text file.
+
+{Index:Buttons}BUTTONS
+This is a simple command that puts the buttoned {B:word} in a box on the screen. Notice that you simply type a {F:4}{{}B:word}{F:0} followed by a single word. Do not forget to put a right curly bracket after the text.
+
+{Index:Tabs}TABS or INDENTS
+A tab or indent is placed with the following command:{{}>:number}. The {F:3}Number{F:0} is equal to millimetres. 
+
+{>:60}Line 1
+{>:60}Line 2
+
+{>:60}Text that follows a tab point will word wrap if necessay, thus maintaining the paragraphing at that tab point.
+
+A new line after a tab point will revert to the standard left margin.
+
+{rule:2}
+
+{F:00000000000001
+{topic:Picture Commands and Lines}{F:0}{Rule:0}{Picture:R,Logo}
+
+Pictures can be left or right justified with text wrapping on either side (if there is room). In addition text can be centred on the screen and be placed inline within the text.
+
+{picture:l,Apple}This picture is on the left with the text appearing down the right hand side. This file is a Draw file. Notice the frame around the apple - this has been drawn in the Draw file.
+
+{picture:r,Apple}This picture is on the right with the text appearing down the left hand side. This file is a Draw file.
+
+{picture:c,Banana}This picture is in the centre of the screen. The text will appear beneath. This file is a Draw file. The banana in the Draw file has no frame drawn in so ClearView frames the boundary of the banana.
+
+The last command places an icon like this {picture:i,logo} in the line of text. This file is a sprite file.
+
+The picture command is in the form of {F:3}{{}Picture:justification,(comma)file name}{F:0}. The file should be in the same directory as the text file. If it is not the full path name of the file should be entered. The simple way to do this in edit is to place the caret where the file path name is to go, press {B:shift} and drag the file from the directory into the text file.
+
+{Rule:0}
+
+{index:Rule Offs}Rule offs can be placed across the screen with the command {f:3}{{}Rule:number}{F:0} where the number is 0, 1 or 2. The above rule off is style number 0. The one below is style 1.
+
+{Rule:1}
+
+{index:Animated Films}ANIMATED FILMS
+Use the commands above to have an Ace Film file run in ClearView.
+
+{Picture:c,Film}
+
+Below is rule off number 2.
+
+{rule:2}
+
+{F:00000000000001
+{topic:Cross Referencing}{F:0}{Rule:0}{Picture:R,Logo}
+
+The text can contain a cross reference to a topic or text elsewhere in the document. For example click on {ref:Text Commands,Text Commands} to go to the first topic.
+
+{index:Index Command}The cross reference can be to an index command. There is an index command in the topic Text Commands - it is in the form of {f:4}{{}Index:Buttons}{f:0}. Click on {ref:Buttons,Buttons} to go to that cross reference point.
+
+The command is in the form {F:4}{{}Ref:word underlined,topic/index name}{f:0}
+
+{rule:2}
+
+{F:00000000000001
+{topic:Index}{F:0}{Rule:0}{Picture:R,Logo}
+
+{index:Reference Command}This index shows how the reference command can be used in the index as well as in the main text. See {ref:Cross Referencing,Cross Referencing} above.
+
+{ref:Short Document,Short Document}{>:60}An index to the phrase in line one of the first topic.
+{ref:Tabs or Indents,Tabs}{>:60}This reference also goes to an Index command.
+{ref:Pictures,Picture Commands and Lines}{>:60}This reference point goes to a topic.
+
+{rule:2}

@@ -1,0 +1,109 @@
+;
+;
+; version number info for ClearView
+;
+;
+versions:!ClearGen.!ClearView.c.Reader, 1.09
+versions:!ClearGen.!RunImage
+;
+END
+;
+Issue Record
+~~~~~~~~~~~~
+Date     Version
+~~~~~~~~ ~~~~~~~
+06/05/91 1.00
+12/05/92 1.01 For Ace computing only
+17/05/92 1.01
+20/05/92 1.02
+21/05/92 1.03 ???
+29/05/92 1.04
+03/06/92 1.05
+12/07/92 1.06
+05/12/93 1.07
+09/01/94 1.08
+16/02/94 1.09
+09/04/93 1.09 Re-issue to fix flickering Ace films (6 of previous sent out)
+
+
+Bug list
+~~~~~~~~
+Num vBug vFix Description
+~~~ ~~~~ ~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+001 1.00 1.01 Ace films not always correctly rendered on first showing
+002 1.00 1.01 Bookmark name of 20 characters crashes program
+003 1.00 1.01 (Doc) Don't have more than 250 refs per topic
+004 1.00 1.12 (Doc) Writing file can't render filetype sprites (MODE43)
+005 1.00 1.13 Could miss font changes and display in wrong font
+006 1.04 1.14 003 above should be ...not more than 120...
+007 1.05 1.15 Printing can give coloured text if top of Draw pic coloured
+008 1.06 1.16 Tabs can cause problems if forced over right hand pics
+009 1.06 1.16 Rule offs sometimes not drawn (eg slow drag of menu over txt)
+010 1.06 1.16 File not found reported as 'file is directory'
+011 1.06      In-line ace films don't animate
+012 1.06 1.16 Zero or missing font size has strange error (number too big)
+013 1.06 1.16 Wimp with tiled windows for colour 1 causes redraw errors
+014 1.07 1.17 Can address exception during compilation
+015 1.07 1.17 Pane flickers when scrolling main window
+
+file with left pic can create REM terminated by CR (not 0)
+file 'dummy' exhibits this and 011 at present
+
+Suggestions
+~~~~~~~~~~~
+Num vFix Description
+~~~ ~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+001      Should be able to save sprites/draw files (see below)
+002      Should have box command (see below)
+003 1.01 (doc) Hint: how to scale sprites
+004      Should have Impulse support to allow remote control
+005 1.07 Compiler should be command line drivable (see below)
+006 1.07 Don't show eval box if register=EP:Acorn Documents {SKLC}
+007 1.09 Simple extension to data_open response to allow tag selection
+
+Notes to suggestions
+~~~~~~~~~~~~~~~~~~~~
+001: New parameter to picture command makes pictures saveable. The picture
+     can then be saved from the menu or by dragging the picture itself out
+     of the document. Also topic text?
+002: Box command can do like pictures and start at the next point where the
+     margin status etc is appropriate. It could be illegal to include
+     pictures/tabs inside boxes (perhaps not nec??). Boxes should be
+     able to have a background which could be a specified colour or
+     could be a sprite/draw file (scaled to fit in).
+004: This would allow use as an on-line, context sensitive, interactive
+     manual. Suggested commands include:
+       Open <pathname>               Open file (unless already open)
+       Load <pathname>               Open file but not window
+       Topic <topicname>             Display particular topic
+       Ref <tag>                     Display particular reference
+       Index                         Display Index
+       Window <x>,<y>,<wid>,<hgt>    Open window at position (OS coords)
+       Close                         Close window
+       Help                          Open own helpfile
+       Quit                          Terminate
+       Print                         Print current topic
+       PrintAll                      Print current file
+       Mark <markname>               Create bookmark
+       Findmark <markname>           Display bookmark
+       Next                          Display next topic
+       Previous                      Display previous topic
+       Search                        Open search dialogue
+005: Run the !RunImage directly giving input and output files as params
+     (eg */!RunImage TextFile HelpFile). The owner string must be in
+     the same directory as the !RunImage to allow compilation. The
+     wimpslot must be big enough. Errors will be printed and a value
+     returned (in Sys$ReturnCode). Input parameters are NOT GSTransed.
+007: The DATAOPEN message can have the file name followed by a space and
+     a set of parameters. The form is then:
+        filename provider,tag[,x0,y0,x1,y1]
+     The file will be loaded if necessary, the window popped to the
+     front and the specified tag displayed (case sensitive). If x0,y0,x1,y1
+     are given they specify the location of the window on the screen. If
+     x1<x0 then the position is optional and will only be used to create
+     a new window, not if it is already open. The provider is a string
+     identifying the source of the message and will be used for a window
+     title instead of the filename. For the whole thing to work, this must
+     have a validation code on the end (as per the owner string) which will
+     be removed prior to display. This means that only licensed software
+     can use this facility.

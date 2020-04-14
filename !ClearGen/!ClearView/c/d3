@@ -1,0 +1,235 @@
+
+#include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "os.h"
+#include "wimp.h"
+#include "wimpt.h"
+#include "coords.h"
+#include "dbox.h"
+
+#define d3__MAXICONS 100
+
+/*
+Library to provide automated drawing of 3D icons with button pressing
+effects etc. Icons are defined by having them indirected and the validation
+string starting with special commands, enclosed in {}. Commands supported
+are shown below. Icons must have the 'Needs Help' switch set on.
+
+    M  Menu icon.      Text for button follows M (eg {MCancel}).
+    S  Sprite button.  Sprite name follows S (eg {Stool}).
+
+The code is called from within the redraw routine for each window. The
+routines provided are:
+
+   void d3_redraw_rectangle(wimp_redrawstr *r)
+   Does all the drawing for one rectangle. May be called inside the
+   wimp_get_rectangle() loop of a redraw routine.
+
+   void d3_redraw(wimp_openstr *o)
+   Does all the redrawing for a whole window. If the only redraw not
+   handled by the wimp is the 3D icons, call this when you get a
+   wimp_EREDRAW event in the window.
+
+  BOOL d3_dbox_raw_event(dbox d,void *event,void *handle)
+  routine suitable for registering as a raw event handler for a dbox. This
+  is for cases where the only special response to a dbox event is that
+  to redraw the icons etc. in this case, just do:
+    dbox_raw_eventhandler(<dbox>,d3_dbox_raw_event,0);
+*/
+
+void d3__buttonborder(wimp_box *box,BOOL down)
+{
+int  x,y,w,h;
+
+w=box->x1-box->x0-1;
+h=box->y1-box->y0-1;
+if(down)
+  {
+  wimp_setcolour(7);
+  x=box->x0+8;
+  y=box->y0;
+  bbc_rectanglefill(x-8,y,3,h);
+  bbc_rectanglefill(x-4,y+h-3,w-4,3);
+  wimp_setcolour(4);
+  bbc_rectanglefill(x-4,y,3,h-4);
+  bbc_rectanglefill(x,y+h-7,w-8,3);
+  }
+else
+  {
+  x=box->x0+4;
+  y=box->y0+4;
+  wimp_setcolour(0);
+  bbc_rectanglefill(x-4,y-4,3,h);
+  bbc_rectanglefill(x,y+h-7,w-4,3);
+  wimp_setcolour(6);
+  bbc_rectanglefill(x-2,y-4,1,1);
+  bbc_rectanglefill(x,y-4,w-4,3);
+  bbc_rectanglefill(x+w-7,y,3,h-8);
+  bbc_rectanglefill(x+w-5,y+h-7,1,1);
+  }
+box->x0=x;
+box->y0=y;
+box->x1=x+w-7;
+box->y1=y+h-7;
+}
+
+int d3__fixstr(char **p,char *c)
+{
+int l=0;
+
+while(**p && **p!='}') 
+  {
+  (*p)++;
+  l++;
+  }
+*c=**p;
+**p=0;
+return(l);
+}
+
+void d3__checkborder(wimp_box *box,wimp_icon *icon)
+{
+if(icon->flags&wimp_IBORDER)
+  {
+  box->x0+=wimpt_dx();
+  box->x1-=wimpt_dx();
+  box->y0+=wimpt_dy();
+  box->y1-=wimpt_dy();
+  }
+}
+
+void d3__plotsprite(int x,int y,char *s)
+{
+}
+
+void d3__spritebutton(wimp_box *pos,wimp_icon *icon)
+{
+char     c,*p,*s;
+wimp_box box;
+
+box=*pos;
+d3__checkborder(&box,icon);
+d3__buttonborder(&box,icon->flags&wimp_ISELECTED);
+s=p=icon->data.indirecttext.validstring+2;
+wimp_setcolour(icon->flags&wimp_ISELECTED?2:1);
+bbc_rectanglefill(box.x0,box.y0,box.x1-box.x0-1,box.y1-box.y0-1);
+d3__fixstr(&p,&c);
+d3__plotsprite(box.x0,box.y0,s);
+*p=c;
+}
+
+void d3__menuicon(wimp_box *pos,wimp_icon *icon)
+{
+char     c,*p,*s;
+int      x,y,w,h,l;
+wimp_box box;
+
+box=*pos;
+d3__checkborder(&box,icon);
+d3__buttonborder(&box,icon->flags&wimp_ISELECTED);
+w=box.x1-(x=box.x0)-1;
+h=box.y1-(y=box.y0)-1;
+wimp_setcolour(12);
+bbc_rectanglefill(x,y,w,h);
+wimp_setcolour(7);
+s=p=icon->data.indirecttext.validstring+2;
+l=d3__fixstr(&p,&c);
+if(icon->flags&wimp_IHCENTRE)
+  x=x+w/2-l*8;
+else
+  {
+  if(icon->flags&wimp_IRJUST)
+    x=x+w-l*16;
+  else
+    x+=4;
+  }
+if(icon->flags&wimp_IVCENTRE)
+  y=y+h/2+16;
+else
+  y=y+h-4;
+bbc_move(x,y);
+puts(s);
+*p=c;
+}
+
+void d3_redraw_rectangle(wimp_redrawstr *r)
+{
+int              i;
+os_error         *e;
+wimp_icon        icon;
+char             *p;
+coords_cvtstr    c;
+wimp_wstate      state;
+wimp_which_block which;
+wimp_i           ilist[d3__MAXICONS],icurr;
+wimp_box         iconpos;
+
+wimp_get_wind_state(r->w,&state);
+c.box=state.o.box;
+c.scx=state.o.x;
+c.scy=state.o.y;
+i=0;
+e=NULL;
+which.window=r->w;
+which.bit_mask=which.bit_set=wimp_IREDRAW;
+wimp_which_icon(&which,ilist);
+while(ilist[i]>=0 && i<d3__MAXICONS)
+  {
+  icurr=ilist[i];
+  e=wimp_get_icon_info(r->w,icurr,&icon);
+  if(!e && !(icon.flags&wimp_IDELETED) &&
+            (icon.flags&wimp_INDIRECT) &&
+            (int)(p=icon.data.indirecttext.validstring)>0 &&
+            *p=='{') /*}*/
+    {
+    iconpos=icon.box;
+    coords_box_toscreen(&iconpos,&c);
+    if(coords_boxesoverlap(&iconpos,&r->g))
+      {
+      char  type;
+
+      type=*++p;
+      p++;
+      if(type>='a' && type<='z') type-=32;
+      switch(type)
+        {
+        case 'M':
+          d3__menuicon(&iconpos,&icon);
+          break;
+        case 'S':
+          d3__spritebutton(&iconpos,&icon);
+          break;
+        }
+      }
+    }
+  i++;
+  }
+}
+
+void d3_redraw(wimp_openstr *o)
+{
+BOOL           more;
+wimp_redrawstr r;
+
+wimpt_checkmode();
+r.w=o->w;
+wimp_redraw_wind(&r,&more);
+while(more)
+  {
+  d3_redraw_rectangle(&r);
+  wimp_get_rectangle(&r,&more);
+  }
+}
+
+BOOL d3_dbox_raw_event(dbox d,void *event,void *handle)
+{
+if(((wimp_eventstr*)event)->e==wimp_EREDRAW)
+  {
+  d3_redraw(&((wimp_eventstr*)event)->data.o);
+  return(TRUE);
+  }
+return(FALSE);
+}

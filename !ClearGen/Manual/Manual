@@ -1,0 +1,433 @@
+{Font:1,Homerton.Medium,20
+{Font:2,Homerton.Medium,16
+{Font:3,Homerton.Medium,12
+{Font:4,Corpus.Medium,14
+{Font:5,Homerton.Medium,14
+{F:1}{topic:How To Write} {Picture:I,cvlogo} Documents{F:0}{Rule:0}{Picture:R,Logo}
+This document describes the method used to create similar {Picture:I,cvlogo} documents. To do this, you need to collect together all the files you wish to use. These will include the following:
+
+{>:5}{Picture:I,TextIcon} Text{>:35}{Index:Text File}You will need exactly one text file, containing the text and commands which describe the document. This is described in greater detail below.
+{>:5}{Picture:I,SpriteIcon} Sprite{>:35}{Index:Sprite File}If you wish to illustrate your document, you may provide the illustrations as Sprite files. Each should contain juts one sprite, preferably without a mask or palette. This is explained further in the topic on the {Ref:Picture Command,Picture Command}.
+{>:5}{Picture:I,DrawIcon} Draw{>:35}{Index:Draw File}Illustrations may also be provided as Draw files. These are displayed in a frame on a white background and should therefore include any border required. This is explained further in the topic on the {Ref:Picture Command,Picture Command}.
+{>:5}{Picture:I,FilmIcon} Film{>:35}{Index:Ace Film File}Animated illustrations can also be included by using Ace Films. These are created using software available from Ace Computing. This is explained further in the topic on the {Ref:Picture Command,Picture Command}.
+
+It is easiest to collect all these files into a single directory, which is used to contain the resources for the document you are creating. If this is not convenient, it is possible to use files from other directories (eg clip art libraries) but you will need to know the complete path names for these files.
+
+Once you have collected these resources together, you will need to give some though to the cross references you will be placing in the document and decide on the best structure to use. In general, it is best to have a short overview of the document near the beginning, followed by a section expanding on each important subject and finally an {Ref:index,Index}. The overview at the start should contain suitable {Ref:cross references,Ref Command} into the following document.
+
+An editor such as Edit should be used to create the text file which ties all the resources together and provides the main text of ther document. This file needs to be in a special format and contains various {Ref:commands,Commands} to achieve different effects.
+
+When you have created your text file, it should be compiled by dragging it to the iconbar icon for this software (you need to have type A (advanced) software for this to work). The document will then be {Ref:compiled,Compiling} and displayed.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+{F:00000000000001
+{topic:Text File Structure}{F:0}{Rule:0}{Picture:R,Logo}
+{Picture:I,cvlogo} documents are divided into {Ref:topics,Topic Command}, each of which must have a unique name. The names will appear in the list of index tags generated in the search window so it is recommended that they should not start with words like 'the' or 'a' as this makes the alphabetical listing less useful. There must always be a topic called 'Index' and this is usually the last in the document.
+
+The text of the document is contained in the text file with commands contained in curly brackets ({{}}) to declare fonts, control indents, insert pictures, mark index points, etc, etc.
+
+It is a good idea to limit the number of different fonts used as this looks better and results in improved performance as less font caching is required. You should try to choose a particular style (eg the heading at the top of each topic in this document) and stick to it throughout.
+
+The file will generally start with font declarations as it is easiest to keep these grouped at the top of the text. As an example, this file starts with the following (see the topic on {Ref:commands,Commands} for details of what each command does):
+
+{Index:Example}{F:4}{>:5}{{}Font:1,Homerton.Medium,20
+{>:5}{{}Font:2,Homerton.Medium,16
+{>:5}{{}Font:3,Homerton.Medium,12
+{>:5}{{}Font:4,Corpus.Medium,14
+{>:5}{{}Font:5,Homerton.Medium,14
+{>:5}{{}F:1}{{}topic:How To Write} {{}Picture:I,cvlogo} Documents{{}F:0}{{}Rule:0}{{}Picture:R,Logo}
+{>:5}This document describes the method used to create similar {{}Picture:I,cvlogo} documents. To do this, you need to collect together all the files you wish to use. These will include the following:
+
+{>:5}{{}Picture:I,TextIcon} Text{{}>:35}You will need exactly one text file, containing the text and commands which describe the document. This is described in greater detail below.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+{F:00000000000001
+{topic:Compiling}{F:0}{Rule:0}{Picture:R,Logo}
+{F:0}The text file containing the main text of the document, and the commands to lay it out, is converted into a document by compiling it. To do this you will need a type A (advanced) version of this software.
+
+When you have entered the text and commands and saved the result in a file, drag this file to the iconbar icon for the software. The file will be loaded and an attempt made to convert it into a document. This will succeed if all comands etc are correct. In this case the resulting document will be displayed.
+
+If the file cannot be compiled an error message will be displayed and the position of the offending section of the file will be indicated. This position is in bytes from the start of the file. Note that the offset of the caret into a text file can be displayed in !Edit by using the Goto option on the Edit menu ({B:F5}).
+
+Once the file has been compiled, the resulting {Picture:I,cvlogo} document may be saved in the normal way. Note that this saves any bookmarks so you should not create any if you are planning to distribute the document (unless this is really what you want).
+
+The error messages are described further in the topic on {ref:errors,Error Messages}.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:Error Messages}{F:0}{Rule:0}{Picture:R,Logo}
+{F:0}The compiler may fail with one of several error messages. Where these are unique to the compiler, they are described below. Other messages should be checked in the RISC OS User Guide.
+
+{f:4}Cross reference to unknown index tag '%s' at location %d.{f:0}
+A {Ref:Ref,Ref Command} command has tried to cross reference an index tag which has not been defined. Check the spelling and the order of parameters carefully.
+
+{f:4}Error processing picture '%s': %s{f:0}
+An error has occurred while processing a picture. The first '%s' will be the name of the picture being processed while the second will be the error message. This should be checked to see what went wrong.
+
+{f:4}File '%s' is a directory.{f:0}
+You have tried to perform a file operation on a directory! Check the name given and correct it if necessary.
+
+{f:4}File '%s' not found.{f:0}
+You have tried to perform a file operation on a file which could not be located. Remember that if you are using leaf names only the files must be in the same directory as the text file.
+
+{f:4}Font %d redefined at location %d.{f:0}
+A {ref:Font,Font Command} command has used the same font number as a previous one. Each fonr number may be used only once. It is best to collect font declarations together at the top of the document to try to avoid this problem.
+
+{f:4}Illegal button '%s' at location %d. Use one word up to 12 characters.{f:0}
+Keypress strings may only contain one word and should not be more than 12 characters long.
+
+{f:4}Illegal font number %d at location %d.{f:0}
+Fonts may only be given numbers in the range 1 to 9 (inclusive). Font 0 is pre-defined to be Trinty.Medium, 14 point.
+
+{f:4}Illegal font reference '%s' at location %d.{f:0}
+An {Ref:F,F Command} command has tried to select a font number which has not been declared by any {ref:Font,Font Command} command.
+
+{f:4}Illegal picture position '%s' at location %d (use I,L,R or C).{f:0}
+A {Ref:Picture,Picture Command} command has an illegal position identifier in the first parameter.
+
+{f:4}Illegal tab position '%s' at location %d (use >0 and <150).{f:0}
+{Ref:Tab,> Command} positions must be in the range 1 to 149 (inclusive).
+
+{f:4}Index tag '%s' at location %d duplicates topic name.{f:0}
+Each new {ref:topic,Topic Command} automatically has an {ref:index tag,Index Command} created for it. Since index tags must be unique, theis means that topic names cannot be the same as existing index tags.
+
+{f:4}Index tag '%s' redefined at location %d.{f:0}
+{ref:Index tags,Index Command} must be unique.
+
+{f:4}Insufficient memory. Free some memory and try again.{f:0}
+There is not enough memory available to complete the compilation. Memory is allocated dynamically so you may be able to proceed by quitting other tasks or changing things in the task manager to make more memory available.
+
+{f:4}Picture file is not a recognised type.{f:0}
+{Ref:Picture,Picture Command} {ref:files,Sprite File} must be Sprite, Draw or Ace Film files.
+
+{f:4}Source file has no topic called 'Index'.{f:0}
+All files must contain a {ref:topic,Topic Command} called '{ref:Index,Index}.'
+
+{f:4}There is an illegal command preceding the first topic identifier.{f:0}
+All text in the document must be under {Ref:topic,Topic Command} headings. The only things which may precede the first Topic command in a document are {Ref:font declarations,Font Command} and the {Ref:font selection,F Command} command for the topic name.
+
+{f:4}There is text preceding the first topic identifier.{f:0}
+All text in the document must be under {Ref:topic,Topic Command} headings. The only things which may precede the first Topic command in a document are {Ref:font declarations,Font Command} and the {Ref:font selection,F Command} command for the topic name.
+
+{f:4}Topic name '%s' redefined at location %d.{f:0}
+Each {ref:topic,Topic Command} must have a unique name.
+
+{f:4}Unknown command '%s' at location %d.{f:0}
+A {ref:command,Commands} was found that could not be recognised. Remember that there is a special command to put {Ref:curly brackets,{} into the text if you need them.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,How To Write} to find out more about writing documents.
+{F:00000000000001
+{topic:Commands}{F:0}{Rule:0}{Picture:R,Logo}
+{F:0}There is a wide selection of commands which may be included in the text, enclosed in curly brackets. See the topic on {Ref:Text File Structure,Text File Structure} for {Ref:examples,Example}. These commands are described in the following table.
+
+A command is recognised by the opening curly bracket. It is terminated by a closing curly bracket or by a new line. New line characters terminating commands are not included in the document and so may be used as an aid to readability. Note that this means that command parameters may not include closing curly brackets and that there is a command to include an opening curly bracket in the document.
+
+The general format of commands is {F:4}{{}command:parameters}{F:0} where multiple parameters are separated by commas. Notice the colon which separates the command from its parameters. Where no parameters are required, the colon should be omitted. For convenience, some frequently used commands are a single symbol rather than a word.
+
+{rule:2}
+{f:2}Command{>:30}Parameters{>:70}Description{f:0}{Rule:0}
+{Ref:Font,Font Command}{>:30}Num,Name,Size{>:70}Declare a font for future use.
+{Ref:Index,Index Command}{>:30}Tag{>:70}Define index point for cross reference.
+{Ref:Topic,Topic Command}{>:30}Topic Name{>:70}Identify start of topic.
+{Ref:F,F Command}{>:30}Number{>:70}Select font for following text.
+{Ref:Picture,Picture Command}{>:30}Pos,Filename{>:70}Insert picture into document.
+{Ref:B,B Command}{>:30}ButtonName{>:70}Create a key symbol.
+{Ref:{,{}{>:70}Insert a curly bracket ({{}).
+{Ref:>,> Command}{>:30}Number{>:70}Tab and indent.
+{Ref:Ref,Ref Command}{>:30}Words,IndexTag{>:70}Mark words for cross-reference.
+{Ref:Rule,Rule Command}{>:30}Type{>:70}Draw a rule_off.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,How To Write} to find out more about writing documents.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:Font Command}{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Declare a font for future use.
+
+{F:5}Syntax:{>:23} {F:4}Font:<number>,<name>,<size>
+
+{F:5}Use:{>:23}    {F:0}Before a new font can be used in a document, it must be declared using this command. Once this command has been issued, the specified number may be used to in the {F:4}{Ref:F,F Command}{F:0} command to switch the text display to the specified font.
+
+{>:23}The font number may be in the range 1 to 9. Font 0 is pre-defined and is always {F:4}Trinity.Medium, 14{F:0}. If no font declarations are made, the document will appear entirely in font 0. You may not re-use a font number in a document so there is a restriction of a total of 10 fonts in any document. Good style dictates that documents should usually contain far fewer than this.
+
+{>:23}When a document is displayed, any font which cannot be located will default to Trinity.Medium. If this font cannot be located, the document will not be displayed. When designing documents, you should remember that you readers may only have access to a limited selection of fonts. Check that your document still looks OK if Trinity.Medium is used throughout.
+
+{F:5}Example:{>:23}{F:4}{{}Font:1, Homerton.Medium, 20}{F:0}
+{>:25}After this command, font 1 may be used to display text in 20 point Homerton.Medium. This is used for the heading at the top of each topic in this document.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:Index Command}{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Define index point for cross reference.
+
+{F:5}Syntax:{>:23} {F:4}Index:<Tag>
+
+{F:5}Use:{>:23}    {F:0}This command marks the point in the document at which it appears, associating the specified tag with that position. No mark is visible when the document is displayed but the tag will appear in the list in the Search Text dialogue box and may be referred to by the {F:4}{Ref:Ref,Ref Command}{F:0} command for cross referencing.
+
+{>:23}Since the tag will appear in the Search Text dialogue you should ensure that it is meaningful. The dialogue box shows the tags sorted into alphabetical order so it is best to avoid tags starting with words like 'The' and 'A.'
+
+{>:23}Tags may be up to 20 characters long. The same tag may not be used twice in one document and a tag may not be the same as a topic name.
+
+{F:5}Example:{>:23}{F:4}{{}Index:Using Tags}{F:0}
+{>:23}This will cause the entry 'Using Tags' to appear in the list in the Search Text dialogue box, allowing readers of the document to view the point at which the tag is located by clicking on the entry in the list. It will be possible to refer to the tag for cross referencing.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:Topic Command}{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Identify start of topic.
+
+{F:5}Syntax:{>:23} {F:4}Topic:<Topic Name>
+
+{F:5}Use:{>:23}    {F:0}All the text in a document must be divided into topics and this command marks the start of each topic. No text may precede the first topic command in a document although font controls may be used to set the font used for the topic header. The Topic Name given will appear at the top of the topic in the current font.
+
+{>:23}An {Ref:index tag,Index Command} will automatically be created using the given Topic Name. This will appear in the sorted list in the Search Text dialogue so it is sensible not to use Topic Names starting with 'The' or 'A' etc. The Topic Name may not be the same as any index tag in the document.
+
+{>:23}Topics should ideally be kept fairly short to break a document up into easily managed chunks. Aim for about one A4 page, or 500 words of plain text, in each topic. Remember that most printouts will be on paper which is approximately A4 in size.
+
+{F:5}Example:{>:23}{F:4}{{}Topic:Font Command}{F:0}
+{>:23}Starts a new topic called 'Font Command.' This is used in this document.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:F Command}{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Select font for following text.
+
+{F:5}Syntax:{>:23} {F:4}F:<Font Number>
+
+{F:5}Use:{>:23}    {F:0}Selects one of the previously declared fonts to apply to the following text. Fonts are declared using the {F:4}{Ref:Font,Font Command}{F:0} command and may be any available fonts. If the font is not available when the document is displayed, Trinity.Medium will be used.
+
+{F:5}Example:{>:23}{F:4}the {{}F:4}Font{{}F:0} command
+{F:0}{>:23}In this example the word 'Font' would appear in font number 4. This is used in this topic, above.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:Picture Command}{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Insert picture into document.{Index:Illustration}
+
+{F:5}Syntax:{>:23} {F:4}Picture:Pos,Filename
+
+{F:5}Use:{>:23}    {F:0}The specified Filename will be used to find a picture and insert it in the text. The Pos may be one of {F:4}L{F:0}, {F:4}C{F:0}, {F:4}R{F:0} or {F:4}I{F:0}. L, C and R cause the picture to be positioned on the Left, Centre or Right of the window while I will insert the picture in-line with the text, treating it like a word.
+
+{>:23}The Filename may be a complete pathname or may be just a leafname. If a leafname is used, the file will be assumed to be located in the same directory as the text file containing the command. The file name may refer to a {Ref:Sprite,Sprite File} file, a {Ref:Draw,Draw File} file or an {Ref:Ace Film,Ace Film File} file. Sprite files are rendered using a palette if present, otherwise using the desktop palette. Draw files are rendered on a white background with a black border around it and so should include some space around the edge if desired. Ace films are animated in the document and are optimised for display in screen modes having the same number of colours and pixels per inch as that in which they were created. All pictures are rendered with a scale of 1:1.
+
+{>:23}Filenames are compared and pictures with identical filenames will only be stored once in the document. This means that repeated pictures, like the logo at the top of this page, do not eat heavily into memory resources. To make the most of this feature, ensure that filenames which are supposed to be identical actually are, including the case of the letters in them.
+
+{>:23}Pictures positioned to the left or right of the window will have text flowed around them where possible. Pictures centred in the window will have blank space to either side. Pictures inserted in-line will be kept in the text at the position they are inserted. Word wrapping will be applied, treating the picture as a single word of the same width. Line spacing will be adjusted to make room on the line for the picture.
+
+{>:23}Note that the minimum width to which a document can be formatted during display is 40mm plus the width of the widest picture in the document.
+
+{>:23}If you are using a screen mode which may not be available on all systems, ensure that any sprites used are not in this mode. Any sprites in unknown modes will not be rendered properly on systems which do not support those modes.
+
+{F:5}Example:{>:23}{F:4}{{}Picture:I,Logo}
+{F:0}{>:23}Inserts a picture file called Logo from the same directory as the text file, in-line with the text. The result might look like this: {Picture:I,logo} .
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:B Command}{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Create a key symbol.{Index:Button}{Index:Keypress}
+
+{F:5}Syntax:{>:23} {F:4}B:<ButtonName>
+
+{F:5}Use:{>:23}    {F:0}When creating documents which need to describe software or the use of computers, it is often necessary to refer to keys on the mouse or keyboard. This command highlights such references by placing a 3D plinth around the given ButtonName and inserting it into the text. The current font is used at the current size. This makes it easier for readers to identify these references as single keypresses as opposed to sequences of characters to be typed.
+
+{>:23}The given ButtonName must be a single word only and should be quite short.
+
+{F:5}Example:{>:23}{F:4}Press {{}B:Tab} to...
+{F:0}{>:23}This might be used to describe a keypress, yielding a reference to {B:Tab} which is quickly identifiable.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:{} Command{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Insert a curly bracket ({{}).{Index:Bracket}
+
+{F:5}Syntax:{>:23} {F:4}{{}
+
+{F:5}Use:{>:23}    {F:0}Since left curly brackets are used to identify commands, they may not appear in the text. If you need one, use this command to obtain it.
+
+{F:5}Example:{>:23}{F:4}Use the {{}{{}} command...
+{F:0}{>:23}Appears as 'Use the {{} command...'
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:> Command}{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Tab and indent.{Index:Indent}{Index:Tab}
+
+{F:5}Syntax:{>:23} {F:4}>:<Number>
+
+{F:5}Use:{>:23}    {F:0}Following text will be positioned the specified Number of millimeters from the left margin and the remainder of the paragraph indented at that position. If the specified position won't fit on the current line (because the text is already to the right of it), a new line is started. If a picture is in the way, the text will skip to the bottom of the picture before starting the indent.
+
+{>:23}Any spaces following this command are ignored. This allows the text following tabs to be aligned in the source text file, making construction of the document slightly easier.
+
+{>:23}Note that the minimum width to which a document can be formatted during display is 40mm plus the largest tab position in the document.
+
+{F:5}Example:{>:23}{F:4}Syntax:{{}>:23}....
+{F:0}{>:23}This is used in this topic to format the text.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:Ref Command}{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Mark words for cross-reference.
+
+{F:5}Syntax:{>:23} {F:4}Ref:<Words>,<IndexTag>
+
+{F:5}Use:{>:23}    {F:0}This is used to build up the cross-reference links in the document. The specified Words are displayed with an underline, the pointer changing shape when positioned over them. Clicking on the underlined words will display the part of the document associated with the given IndexTag.
+
+{>:23}The IndexTag must exist although it may not have been defined when this command appears (ie forward references are possible). The IndexTag is defined using the {Ref:Index,Index Command} or {Ref:Topic,Topic Command} commands.
+
+{>:23}You should not have more that 120 Ref commands in one topic. Any above this number will be displayed, and will appear in the search window, but it will not be possible to follow them by clicking. 
+
+{F:5}Example:{>:23}{F:4}using the {{}Ref:Index,Index Command} or...
+{F:0}{>:23}Builds a cross-reference, as used in this topic.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:Rule Command}{F:0}{Rule:0}{Picture:R,Logo}
+{F:5}Purpose:{>:23}{F:0}Draw a rule_off.
+
+{F:5}Syntax:{>:23} {F:4}Rule:<Type>
+
+{F:5}Use:{>:23}    {F:0}A rule-off of the specified Type is drawn across the document under the line on which the command appears. The type can be 0, 1 or 2 for a single line, broken line or double line rule-off.
+
+{>:23}Rule-offs will not be drawn under the very last line in a topic. If there is a danger of this happening at some text widths, ensure there is a blank line at the end of the topic.
+
+{F:5}Example:{>:23}{F:4}{{}Rule:1}
+{F:0}{>:23}This is used just below to separate the reference list from the body of the topic.
+{Rule:1}
+{F:3
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Hints and Tips} to find out more about writing techniques.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:Hints and Tips}{F:0}{Rule:0}{Picture:R,Logo}
+Creating documents is relatively easy but a little thought will result in a far better product. Here are some tips to help produce documents more quickly and effectively:
+
+ *{>:5}The fewer fonts you use (including different sizes), the better your document will look and the smaller the time and memory used by font caching will be. Remember that {Ref:Draw,Draw File} files may contain fonts and try to keep these consistent.
+
+ *{>:5}Remember that the standard Apps discs supplied with the Archimedes Computer contain very few fonts (Trinity.Medium and Corpus.Medium). If you wish to be sure that your reader has access to the fonts you use, don't use any others.
+
+ *{>:5}Try to have all the fonts used in the document appear in the initial view of the first topic. This will ensure that they are all cached right at the start of reading the document.
+
+ *{>:5}{Ref:Index,Index} topics have a tendency to be very tall and thin! Try to combine the index with a glossary to fill out the page a bit and to help readers of the document.
+
+ *{>:5}If possible, check the appearance of your document in both high and low resolution modes (eg 20 and 12). Some things, especially Draw files, may not appear as expected.
+
+ *{>:5}Check the appearance of your document in 256 colour modes. In particular, beware of white objects in Draw and 16-colour Sprite files as it easy to make these grey by accident.
+
+ *{>:5}{Ref:Index tags,Index Command} can be grouped together by prefixing them with a special character. As an example, this document could have used a dash (-) at the start of the index tag for each of the commands to group the command references together at the start of the list in the Search Text dialogue box.
+
+ *{>:5}If you need to read this manual while creating your own documents, remember that you can run two copies of the software. One can display this manual while the other compiles your work.
+
+ *{>:5}Test {Ref:compile,Compiling} your document frequently as you write it. It is easier to find errors if you know they are in a section you recently added. Also, it is generally easier to proof-read the text in the final display than in !Edit or similar.
+
+ *{>:5}Get the bulk of your document text in place before trying to create the {Ref:cross-references,Ref Command}. You can mark up a printout of the document with all the cross-references you want and then put them all in afterwards.
+
+ *{>:5}Remember that {Ref:cross-references,Ref Command} are the single most important feature of {Picture:I,cvlogo} documents. Try to have a good selection and try to think of all the references people might want to make.
+
+ *{>:5}Use existing documents as a guide to style to help maintain consistency from you readers' point of view. Try to keep style consistent throughout your own document.
+
+ *{>:5}If you use RISC OS 3 !Edit or !SrcEdit to edit your text, you can start your index by inserting all the index tags and compiling the document. Then open the Search Text dialogue and copy the list of tags into the index topic, one per line. Next, put the caret at the top of the index topic and use the Search/Replace ({B:F4}) facility, with Wild Cards, to search for {F:4}^.${F:0} and replace it with {F:4}{{}Ref:?0,?0}${F:0} for all finds. This will build the basic index.
+
+ *{>:5}If you need more than 120 entries in your index topic you will run into the limit on the number of Ref commands in one topic. In this case, split the index into several topics alphabetically and make the first one the 'official' index. You can describe this arrangement in a brief note at the top of each topic with cross references to the other index topics.
+
+ *{>:5}Remember that your readers may potentially only have a 1 megabyte machine. Check that your document can be read on such a machine without difficulty. Also remember that there is only 800k of space on a floppy disc!
+
+ *{>:5}If you want to scale a sprite to be displayed larger than life, put it in a Draw file, scale it and then include the Draw file. If you want to scale it smaller, create a smaller sprite and include that. This choice of techniques uses the minimum possible space without compromising quality.
+
+ *{>:5}If you think different people may want to look something up by different references, you can put several different index tags at the same point. You can also put several different references to the same index tag in the Index topic as well as elsewhere in the document.
+{rule:1}
+ *{>:5}Click {Ref:here,Text File Structure} to find out more about the structure of the text file.
+ *{>:5}Click {Ref:here,Commands} to find out more about the commands available.
+ *{>:5}Click {Ref:here,Compiling} to find out more about the compiler.
+ *{>:5}Click {Ref:here,Error Messages} to find out more about errors.
+{F:00000000000001
+{topic:Index}{F:0}{Rule:0}{Picture:R,Logo}
+Index of useful reference points. Click on the underlined text to go to any referenced point in the text.
+
+{Ref:> Command,> Command}{>:60}Indent/tab command
+{Ref:Ace Film File,Ace Film File}{>:60}For animated illustrations
+{Ref:B Command,B Command}{>:60}Button/keypress representation
+{Ref:Bracket,Bracket}{>:60}Putting curly brackets in the text
+{Ref:Button,Button}{>:60}Button/keypress representation
+{Ref:Commands,Commands}{>:60}Overview of commands
+{Ref:Compiling,Compiling}{>:60}How to compile the document
+{Ref:Draw File,Draw File}{>:60}For detailed illustrations
+{Ref:Error Messages,Error Messages}{>:60}Meanings of compiler errors
+{Ref:Example,Example}{>:60}Example text with commands
+{Ref:F Command,F Command}{>:60}Font changing
+{Ref:Font Command,Font Command}{>:60}Font declaration
+{Ref:Hints and Tips,Hints and Tips}{>:60}Useful ideas for writing
+{Ref:How to Write Documents,How to Write}{>:60}Overview and introduction
+{Ref:Illustration,Illustration}{>:60}Putting pictures in documents
+{Ref:Indent,Indent}{>:60}Indenting text (like this)
+{Ref:Index Command,Index Command}{>:60}Cross reference creation
+{Ref:Keypress,Keypress}{>:60}Button/keypress representation
+{Ref:Picture Command,Picture Command}{>:60}Putting pictures in documents
+{Ref:Ref Command,Ref Command}{>:60}Cross reference creation
+{Ref:Sprite File,Sprite File}{>:60}For painted/digitised illustrations
+{Ref:Tab,Tab}{>:60}Tabulating text (like this)
+{Ref:Text File,Text File}{>:60}For the main text and commands
+{Ref:Text File Structure,Text File Structure}{>:60}How to arrange the input
+{Ref:Topic Command,Topic Command}{>:60}Breaking up the document

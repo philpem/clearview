@@ -1,0 +1,60 @@
+
+/*******************************************/
+/*                                         */
+/*  Menu definitions created by MakeMenus  */
+/*      (For inclusion in main code)       */
+/*                                         */
+/*  MakeMenus v0.04 by Merlyn Kline, 1990  */
+/*                                         */
+/*******************************************/
+
+/*---- Include RISCOSLib headers if necessary ------------------------*/
+#ifndef __menu_h
+#include "menu.h"
+#endif
+
+/*---- Identities for all possible menu options ----------------------*/
+#define MO_NOOPTION                 0
+#define MO_READER_INFO              1
+#define MO_READER_QUIT              2
+#define MO_READER_SAVE              1
+#define MO_READER_PRINT             2
+#define MO_READER_TOOLS             3
+#define MO_TOOLS_NEXTTOPIC          1
+#define MO_TOOLS_PREVTOPIC          2
+#define MO_TOOLS_BACKTRACE          3
+#define MO_TOOLS_SEARCH             4
+#define MO_TOOLS_BOOKMARK           5
+#define MO_TOOLS_INDEX              6
+
+/*---- Menu handles --------------------------------------------------*/
+menu  m_reader;
+menu  m_reader1;
+menu  m_tools;
+
+BOOL define_menus(void)
+{
+char tempname[30];
+
+/*---- Define menu: Reader -------------------------------------------*/
+  if ((m_reader=menu_new(
+        msgs_lookup(strcat(strcpy(tempname,"mtReader:"),progname+1)),
+        msgs_lookup("m_Reader:>Info,Quit")))
+                             ==NULL)
+    return FALSE;
+/*---- Define menu: Reader -------------------------------------------*/
+  if ((m_reader1=menu_new(
+        msgs_lookup(strcat(strcpy(tempname,"mtReader1:"),progname+1)),
+        msgs_lookup("mReader1:>Save,>Print,Tools")))
+                             ==NULL)
+    return FALSE;
+/*---- Define menu: Tools --------------------------------------------*/
+  if ((m_tools=menu_new(
+        msgs_lookup("mtTools:Tools"),
+        msgs_lookup("mTools:Next Topic,Prev Topic,Back Trace,Search,Bookmark,Index")))
+                             ==NULL)
+    return FALSE;
+/*---- Link the menu trees together ----------------------------------*/
+  menu_submenu(m_reader1,MO_READER_TOOLS,m_tools);
+  return TRUE;
+}

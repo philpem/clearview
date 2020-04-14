@@ -1,0 +1,9 @@
+* Allow export of draw objects from files having a flag set to allow this
+  Command in text input to compiler would enable this (ie turn flag on)
+
+* Support sound objects which squawk when clicked on (and when (optionally?) first displayed?)
+
+* Separate app providing function buttons to insert commands into edit docs
+
+--------------------------------------------------------------------------
+Make sure load file via message does nothing if specified file is already loaded

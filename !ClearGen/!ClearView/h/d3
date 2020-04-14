@@ -1,0 +1,12 @@
+
+#ifndef __wimp_h
+#include "wimp.h"
+#endif
+
+#ifndef __dbox_h
+#include "dbox.h"
+#endif
+
+extern void d3_redraw_rectangle(wimp_redrawstr *r);
+extern void d3_redraw(wimp_openstr *r);
+extern BOOL d3_dbox_raw_event(dbox d,void *event,void *handle);

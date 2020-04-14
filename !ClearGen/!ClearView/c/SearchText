@@ -1,0 +1,392 @@
+
+#include "stdlib.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "stdio.h"
+#include "ctype.h"
+
+#include "os.h"
+#include "dbox.h"
+#include "wimp.h"
+#include "wimpt.h"
+#include "win.h"
+#include "template.h"
+#include "coords.h"
+#include "visdelay.h"
+
+#include "Reader.h"
+#include "d3.h"
+
+#define ICONHEIGHT 40
+
+static wimp_wind  *indexpane;
+static wimp_w     indexpanehandle=NULL;
+static dbox       searchd=NULL;
+static char       searchs1[32]="";
+static char       searchs2[sizeof(searchs1)]="";
+static int        searchlogic=2;
+static BOOL       searchnext=FALSE;
+static int        searchind=0;
+static char       *namelist=NULL;
+static int        oflastfind;
+
+BOOL searchtext_isopen(void)
+{
+return(searchd!=NULL);
+}
+
+void searchindex(int index)
+{
+h_indexdef *x;
+
+x=(h_indexdef*)((int)dataptr+dataptr->ofindex);
+x+=index;
+text_goto(x->offset);
+searchind=index;
+pane_greyicons();
+}
+
+void readiconbox(wimp_w w,wimp_i i,wimp_box *box)
+{
+coords_cvtstr c;
+wimp_wstate   state;
+wimp_icon     icon;
+
+wimp_get_wind_state(w,&state);
+c.scx=state.o.x;
+c.scy=state.o.y;
+c.box=state.o.box;
+wimp_get_icon_info(w,i,&icon);
+*box=icon.box;
+coords_box_toscreen(box,&c);
+}
+
+void openindexpane(wimp_openstr *o,BOOL scroll)
+{
+wimp_openstr open;
+wimp_wstate  oldstate;
+
+open=*o;
+open.x=0;
+open.w=indexpanehandle;
+readiconbox(dbox_syshandle(searchd),2,&open.box);
+open.box.x0+=wimpt_dx();
+open.box.x1-=wimpt_dx();
+open.box.y0+=wimpt_dy();
+open.box.y1-=wimpt_dy();
+if(scroll)
+  open.y=-searchind*ICONHEIGHT+(open.box.y1-open.box.y0-ICONHEIGHT)/2;
+else
+  {
+  wimp_get_wind_state(indexpanehandle,&oldstate);
+  open.y=oldstate.o.y;
+  }
+wimp_open_wind(&open);
+}
+
+void frontsearch(void)
+{
+wimp_wstate state;
+
+wimp_get_wind_state(dbox_syshandle(searchd),&state);
+state.o.behind=-1;
+wimp_open_wind(&state.o);
+openindexpane(&state.o,FALSE);
+}
+
+void indexpane_eventproc(wimp_eventstr *e,void *handle)
+{
+os_error *error;
+
+error=NULL;
+switch(e->e)
+  {
+  case wimp_EOPEN:
+    error=wimp_open_wind(&(e->data.o));
+    break;
+  case wimp_ECLOSE:
+    wimp_close_wind(indexpanehandle);
+    break;
+  case wimp_EBUT:
+    if(e->data.but.m.bbits!=1) searchtextclose();
+    searchindex(e->data.but.m.i);
+    if(e->data.but.m.bbits==1) frontsearch();
+    break;
+  }
+wimpt_complain(error);
+}
+
+void createindexicons(dbox d)
+{
+wimp_box       box;
+int            h,i;
+wimp_icreate   icon;
+wimp_i         temp;
+int            bufsz;
+char           *p;
+int            name;
+wimp_redrawstr r;
+
+bufsz=dataptr->ofdict;
+if(!bufsz) bufsz=dataptr->ofpics;
+if(!bufsz) bufsz=dataptr->oftext;
+bufsz-=dataptr->ofindex;
+bufsz-=dataptr->szindex*sizeof(h_indexdef);
+readiconbox(dbox_syshandle(d),2,&box);
+h=box.y1-box.y0-8;
+if(h<dataptr->szindex*ICONHEIGHT) h=dataptr->szindex*ICONHEIGHT;
+namelist=malloc(bufsz);
+if(namelist)
+  {
+  p=namelist;
+  name=dataptr->ofindex+dataptr->szindex*sizeof(h_indexdef);
+  icon.w=indexpanehandle;
+  for(i=0;i<dataptr->szindex;i++)
+    {
+    strcpy(p,(char*)dataptr+name);
+    icon.i.box.x0=0;
+    icon.i.box.x1=20*16+8;
+    icon.i.box.y1=-i*ICONHEIGHT-1;
+    icon.i.box.y0=icon.i.box.y1-ICONHEIGHT;
+    icon.i.flags=wimp_ITEXT|wimp_IFILLED|wimp_INDIRECT|
+                 (wimp_BSELDOUBLE<<12)|(31<<16)|(7<<24)|(2<<28);
+    if(i==searchind) icon.i.flags|=wimp_ISELECTED;
+    icon.i.data.indirecttext.buffer=p;
+    icon.i.data.indirecttext.validstring=NULL;
+    icon.i.data.indirecttext.bufflen=strlen(p)+1;
+    wimp_create_icon(&icon,&temp);
+    name+=strlen(p)+1;
+    p+=strlen(p)+1;
+    }
+  }
+r.w=indexpanehandle;
+r.box.x0=0;
+r.box.x1=640;
+r.box.y1=-1;
+r.box.y0=-h-1;
+wimp_set_extent(&r);
+}
+
+void searchtextclose(void)
+{
+if(indexpanehandle)
+  {
+  wimp_close_wind(indexpanehandle);
+  wimp_delete_wind(indexpanehandle);
+  win_register_event_handler(indexpanehandle,NULL,0);
+  indexpanehandle=NULL;
+  }
+if(searchd)
+  {
+  dbox_raw_eventhandler(searchd,0,0);
+  dbox_dispose(&searchd);
+  searchd=NULL;
+  pane_greyicons();
+  }
+free(namelist);
+namelist=NULL;
+}
+
+BOOL matchstr(int ofs,int ofe, char *s)
+{
+char *p;
+ 
+if(*s==0) return(FALSE);
+p=(char*)dataptr+ofs;
+while(*s && ofs<=ofe && *s==toupper(*p))
+  {
+  s++;
+  p++;
+  ofs++;
+  }
+return(*s==0);
+}
+
+BOOL matchnear(int ofs,int ofe, char *s)
+{
+int  i=0;
+BOOL found=FALSE;
+
+while(i<200 && ofs<=ofe && !found)
+  {
+  found=matchstr(ofs,ofe,s);
+  ofs++;
+  i++;
+  }
+return(found);
+}
+
+void readsearchd(void)
+{
+dbox_getfield(searchd,8,searchs1,sizeof(searchs1));
+dbox_getfield(searchd,9,searchs2,sizeof(searchs2));
+searchlogic=2;
+if(dbox_getnumeric(searchd,10)) searchlogic=1;
+if(dbox_getnumeric(searchd,12)) searchlogic=3;
+searchnext=dbox_getnumeric(searchd,15);
+}
+
+void dosearch(void)
+{
+int    ofcurr,ofend,srctopic;
+char   s1[sizeof(searchs1)],s2[sizeof(searchs2)];
+BOOL   found;
+
+if(!searchs1[0] && !searchs2[0]) return;
+strcpy(s1,searchs1);
+strcpy(s2,searchs2);
+uppercase(s1);
+uppercase(s2);
+ofcurr=dataptr->oftext;
+if(searchnext) ofcurr=oflastfind+1;
+if(ofcurr>rflex_size((flex_ptr)&dataptr)) ofcurr=dataptr->oftext;
+srctopic=0;
+if(searchnext) srctopic=dataptr->currenttopic;
+ofend=ofcurr-1;
+visdelay_begin();
+do
+  {
+  found=FALSE;
+  if(ofcurr>ofend)
+    {
+    if(srctopic>=dataptr->sztopics-1)
+      ofend=rflex_size((flex_ptr)&dataptr);
+    else
+      {
+      h_topicdef *t;
+
+      t=(h_topicdef*)((int)dataptr+dataptr->oftopics);
+      t+=srctopic+1;
+      ofend=t->offset-1;
+      }
+    }
+  switch(searchlogic)
+    {
+    case 1:
+      if((matchstr(ofcurr,ofend,s1) && matchnear(ofcurr,ofend,s2)) ||
+         (matchstr(ofcurr,ofend,s2) && matchnear(ofcurr,ofend,s1)))
+        found=TRUE;
+      break;
+    case 2:
+      if(matchstr(ofcurr,ofend,s1) || matchstr(ofcurr,ofend,s2))
+        found=TRUE;
+      break;
+    case 3:
+      if((matchstr(ofcurr,ofend,s1) && !matchnear(ofcurr,ofend,s2)) ||
+         (matchstr(ofcurr,ofend,s2) && !matchnear(ofcurr,ofend,s1)))
+        found=TRUE;
+      break;
+    }
+  if(!found) ofcurr++;
+  if(ofcurr>ofend) srctopic++;
+  } while(srctopic<dataptr->sztopics && !found);
+visdelay_end();
+if(found)
+  {
+  oflastfind=ofcurr;
+  text_goto(oflastfind);
+  }
+else
+  wimpt_complain(errorgen(9));
+pane_greyicons();
+}
+
+BOOL searchevent(dbox d,void *event,void *handle)
+{
+wimp_eventstr *e;
+
+e=(wimp_eventstr*)event;
+switch(e->e)
+  {
+  case wimp_EOPEN:
+    {
+    wimp_wstate state;
+
+    openindexpane(&e->data.o,FALSE);
+    e->data.o.behind=indexpanehandle;
+    wimp_open_wind(&e->data.o);
+    wimp_get_wind_state(e->data.o.w,&state);
+    openindexpane(&state.o,FALSE);
+    return(TRUE);
+    }
+    break;
+  case wimp_ECLOSE:
+    wimp_close_wind(indexpanehandle);
+    break;
+  case wimp_EBUT:
+    switch(e->data.but.m.i)
+      {
+      case 4:
+        {
+        int        i,offset=0;
+        wimp_icon  icon;
+
+        for(i=0;i<dataptr->szindex;i++)
+          {
+          wimp_get_icon_info(indexpanehandle,i,&icon);
+          if(icon.flags&wimp_ISELECTED)
+            {
+            offset=i;
+            i=dataptr->szindex;
+            }
+          }
+        if(e->data.but.m.bbits!=1) searchtextclose();
+        searchindex(offset);
+        if(e->data.but.m.bbits==1) frontsearch();
+        } break;
+      case 13:
+        readsearchd();
+        if(e->data.but.m.bbits!=1) searchtextclose();
+        dosearch();
+        if(e->data.but.m.bbits==1) frontsearch();
+       break;
+      case 14:
+        searchtextclose();
+        break;
+      }
+    return(TRUE);
+    break;
+  case wimp_EKEY:
+    if(e->data.key.chcode==13 && e->data.key.c.i==9)
+      {
+      readsearchd();
+      searchtextclose();
+      dosearch();
+      return(TRUE);
+      }
+    break;
+  }
+return(FALSE);
+}
+
+os_error *searchtext(void)
+{
+wimp_caretstr c;
+wimp_wstate   state;
+
+indexpane=template_syshandle("indexpoints");
+if(!indexpane) return(errorgen(0));
+ERROUT(wimp_create_wind(indexpane,&indexpanehandle))
+win_register_event_handler(indexpanehandle,indexpane_eventproc,0);
+searchd=dbox_new("search");
+if(!searchd) return(errorgen(6));
+dbox_raw_eventhandler(searchd,searchevent,0);
+createindexicons(searchd);
+dbox_showstatic(searchd);
+if(searchind>=dataptr->szindex) searchind=0;
+c.w=dbox_syshandle(searchd);
+c.i=8;
+c.height=-1;
+c.index=strlen(searchs1);
+wimp_set_caret_pos(&c);
+dbox_setfield(searchd,8,searchs1);
+dbox_setfield(searchd,9,searchs2);
+dbox_setnumeric(searchd,10,searchlogic==1);
+dbox_setnumeric(searchd,11,searchlogic==2);
+dbox_setnumeric(searchd,12,searchlogic==3);
+dbox_setnumeric(searchd,15,searchnext);
+wimp_get_wind_state(dbox_syshandle(searchd),&state);
+openindexpane(&state.o,TRUE);
+return(NULL);
+}

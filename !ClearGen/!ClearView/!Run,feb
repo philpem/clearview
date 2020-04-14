@@ -1,0 +1,14 @@
+Run <Obey$Dir>.!Boot
+WimpSlot -Min 200k -Max 200k
+Set Temp 0
+RMEnsure ColourTrans 0.00 Set Temp 1
+RMEnsure FPEmulator 0.00 Set Temp 1
+IF Temp = 1 Then If "<System$Path>" = "" Then Error System resources (!System) not found. Please double click on a copy of !System and try again.
+UnSet Temp
+RMEnsure ColourTrans 0.00 RMLoad System:Modules.Colours
+RMEnsure FPEmulator 0.00 RMLoad System:Modules.FPEmulator
+RMEnsure Euclid 1.04 RMLoad <Obey$Dir>.EuclidX
+Set ClearView$Dir <Obey$Dir>
+Set ClearView$Path <Obey$Dir>.
+WimpSlot -Min 200k -Max 200k
+Run <Obey$Dir>.!RunImage %*0

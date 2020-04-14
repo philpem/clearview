@@ -1,0 +1,7 @@
+
+extern char *owner_idstr(void);
+extern int  owner_software_type(void);
+extern int  owner_licence_type(void);
+extern BOOL owner_validstr(char *s);
+extern void owner_init(char *progpath);
+extern int  owner_oktype(int mintype);

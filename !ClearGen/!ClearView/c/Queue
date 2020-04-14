@@ -1,0 +1,71 @@
+
+#include "stdlib.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "stdio.h"
+
+#include "os.h"
+#include "win.h"
+#include "wimp.h"
+#include "wimpt.h"
+#include "resspr.h"
+#include "template.h"
+#include "res.h"
+#include "dbox.h"
+#include "event.h"
+#include "msgs.h"
+#include "baricon.h"
+#include "flex.h"
+#include "werr.h"
+#include "font.h"
+#include "visdelay.h"
+
+#include "Reader.h"
+
+static int queue[50];
+static int queuesize=0;
+
+void queue_storepos(void)
+{
+int         offset;
+wimp_wstate state;
+linestr     *l=lineptr;
+
+wimp_get_wind_state(text_handle,&state);
+if(state.o.y)
+  {
+  state.o.y+=PICMAR;
+  while(state.o.y+l->height<0)
+    {
+    state.o.y+=l->height;
+    l++;
+    }
+  }
+offset=l->offset;
+memmove(&(queue[1]),queue,sizeof(queue)-sizeof(queue[1]));
+queue[0]=offset;
+if(queuesize!=sizeof(queue)/sizeof(queue[0])) queuesize++;
+}
+
+void queue_empty(void)
+{
+queuesize=0;
+}
+
+BOOL queue_isempty(void)
+{
+return(queuesize==0);
+}
+
+void queue_backstep(void)
+{
+if(queuesize)
+  {
+  int offset=queue[0];
+
+  memmove(queue,&(queue[1]),sizeof(queue)-sizeof(queue[1]));
+  queuesize--;
+  text_goto1(offset);
+  }
+}

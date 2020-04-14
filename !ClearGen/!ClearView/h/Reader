@@ -1,0 +1,189 @@
+
+#ifndef __flex_h
+#include "flex.h"
+#endif
+
+#define KEYCODE "Merlyn"
+
+#define LINEGAP 0
+#define PICMAR 30
+#define USXREFSIZE 25
+#define USXREFPOS 226
+#define USDEFSIZE 12
+#define USDEFPOS 226
+
+#define ERROUT(f) {os_error *e; e=f; if(e) return(e);}
+#define SIZEOFARRAY(x) (sizeof(x)/sizeof(x[0]))
+
+#define PANEWIDTH 448
+#define PANEHEIGHT 64
+
+#define TEXTTYPE 0xFFF
+#define OURTYPE 0xc29
+
+#define MAXFONTS 10
+
+#define LF_FONT      0xf     /* line start font */
+#define LF_IPIC      0x10    /* line contains I pic */
+#define LF_PIC       0x20    /* line contains start of L/R pic */
+#define LF_PICCONT   0x40    /* line contains part of L/R pic */
+#define LF_STXREF    0x80    /* line starts inside xref */
+#define LF_STDEF     0x100   /* line starts inside def */ 
+#define LF_DEF       0x200   /* line contains xref(s) */
+#define LF_XREF      0x400   /* line contains def(s) */
+#define LF_CPIC      0x800   /* line is centred picture only */
+#define LF_BOXS      0x1000  /* line contains box start */
+#define LF_BOXE      0x1000  /* line contains box end */
+#define LF_KEY       0x4000  /* line contains keypress(es) */
+#define LF_RULE      0x8000  /* line has rule-off above it */
+#define LF_RULE1     0x10000 /* line has broken rule-off above */
+#define LF_RULE2     0x20000 /* line has double rule-off above */
+
+typedef struct
+  {
+  int lmar;
+  int height;
+  int offset;
+  int flags;
+  int base;
+  } linestr;
+
+typedef struct
+  {
+  int  version;
+  int  minwidth;
+  int  oftext;
+  int  ofpics;
+  int  filesize;
+  int  compression;
+  int  szdict;
+  int  ofdict;
+  int  sztopics;
+  int  oftopics;
+  int  szindex;
+  int  ofindex;
+  int  szfonts;
+  int  offonts;
+  int  indextopic;
+  int  currenttopic;
+  int  currentwidth;
+  char marknames[315];
+  int  ofmark[15];
+  char creator[32];
+  } text_header;
+
+typedef struct
+  {
+  int  pointsize;
+  int  number;
+  int  handle;
+  int  height;
+  int  base;
+  } h_fontdef;
+
+typedef struct
+  {
+  int  offset;
+  int  flags;
+  } h_topicdef;
+
+typedef struct
+  {
+  int  offset;
+  } h_indexdef;
+
+typedef struct
+  {
+  int  offset;
+  } h_dictdef;
+
+typedef struct
+  {
+  int  offset;
+  int  size;
+  int  type;
+  int  height;
+  int  width;
+  } h_pictdef;
+
+extern char        progname[30];
+extern wimp_w      text_handle;
+extern wimp_w      pane_handle;
+extern text_header *dataptr;
+extern linestr     *lineptr;
+extern char        pathname[256];
+extern BOOL        modified;
+extern BOOL        eversaved;
+extern BOOL        film_visible;
+extern BOOL        cli;
+extern char        help_provider[100];
+extern int         o_x0,o_y0,o_x1,o_y1;
+
+extern char *getcreator(char *buffer);
+extern os_error *select_topic(int topic,int offset);
+extern os_error *findfonts(void);
+extern void losefonts(void);
+extern BOOL checkeval(void);
+
+extern void text_eventproc(wimp_eventstr *e,void *handle);
+extern void text_update(wimp_redrawstr *r);
+extern os_error *text_closewindow(void);
+extern void text_showwindow(void);
+extern void text_destroy(void);
+extern os_error *text_format(text_header **dataflex,linestr **lineflex,
+                             wimp_w w,int pagewidth,int topoffset);
+extern os_error *text_openwindow(wimp_openstr *o);
+extern void text_goto1(int offset);
+extern void text_goto(int offset);
+extern void text_settitle(void);
+extern os_error *text_draw(wimp_redrawstr *r,BOOL update,linestr **plptr,
+                           int wid,int print);
+extern os_error *project_next_frame(int *p);
+
+extern int hex2(char *p);
+extern int hex4(char *p);
+extern int hex6(char *p);
+
+extern void pane_eventproc(wimp_eventstr *e,void *handle);
+extern os_error *pane_openwindow(wimp_openstr *o);
+extern os_error *pane_closewindow(void);
+extern os_error *pane_open_near(wimp_openstr *o);
+extern os_error *pane_greyicons(void);
+
+extern char *uppercase(char *p);
+extern os_error *errorgen(int e);
+extern os_error *errorgenv(int e, ...);
+
+extern void comp_ramload(void);
+extern void comp_fileload(BOOL open);
+extern os_error *comp_textload(char *filename,BOOL xfer);
+extern void comp_init(void);
+extern BOOL comp_allow_compile(void);
+extern os_error *comp_compile(char *f);
+
+extern BOOL blockflex_initblock(flex_ptr p,int blocksize);
+extern int blockflex_allocated(flex_ptr p);
+extern void blockflex_trimblock(flex_ptr p);
+extern BOOL blockflex_allocate(flex_ptr p,int size,int blocksize);
+extern void *blockflex_address(flex_ptr p);
+extern BOOL blockflex_padtoword(flex_ptr p,int blocksize);
+
+extern void queue_storepos(void);
+extern void queue_empty(void);
+extern BOOL queue_isempty(void);
+extern void queue_backstep(void);
+
+extern os_error *bookmark(void);
+
+extern os_error *searchtext(void);
+extern void searchtextclose(void);
+extern BOOL searchtext_isopen(void);
+
+extern os_error *printtext(int copies,BOOL thistopic);
+
+extern BOOL cli;
+
+extern BOOL rflex_alloc(flex_ptr p,int size);
+extern BOOL rflex_extend(flex_ptr p,int size);
+extern void rflex_free(flex_ptr p);
+extern int  rflex_size(flex_ptr p);

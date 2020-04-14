@@ -1,0 +1,16 @@
+{Font:1,Trinity.Medium,20
+{Font:2,Trinity.Medium,14
+{F:00000000000001
+{topic:First Topic}{Rule:0}
+
+{F:2}Type your text here
+
+{rule:2}
+
+{F:00000000000001
+{topic:Index}{F:0}{Rule:0}
+
+{F:2}Enter your index here
+
+{rule:2}
+

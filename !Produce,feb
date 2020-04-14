@@ -1,0 +1,35 @@
+ADFS
+Set ProduceTo$Dir :0
+Set ProduceFrom$Dir <Obey$Dir>
+Echo <10>Creating ClearView Generator disc...<10>
+Set Alias$Temp NameDisc <ProduceTo$Dir> ClearGen
+Temp
+UnSet Alias$Temp
+CDir <ProduceTo$Dir>.!ClearGen
+CDir <ProduceTo$Dir>.!ClearGen.!ClearView
+Set Alias$C Copy <ProduceFrom$Dir>.!ClearGen.%%0 <ProduceTo$Dir>.!ClearGen.%%0 f~r~v~c
+C Writing
+C !Boot
+C !Run
+C !RunImage
+C !Sprites
+C !ReadMe
+C InitApp
+C !ClearView.!Help
+C !ClearView.!Boot
+C !ClearView.!Run
+C !ClearView.Templates
+C !ClearView.!RunImage
+C !ClearView.!Sprites
+C !ClearView.Sprites
+C !ClearView.EuclidX
+C !ClearView.InitApp
+C !ClearView.Messages
+Set Alias$C Copy <ProduceFrom$Dir>.!ClearGen.%%0 <ProduceTo$Dir>.!ClearGen.%%0 fr~v~c
+C Help
+C Manual
+C Extras
+Unset Alias$C
+Copy <ProduceFrom$Dir>.VersionNos <ProduceTo$Dir>.VersionNos f~r~v~c
+UnSet ProduceTo$Dir
+UnSet ProduceFrom$Dir

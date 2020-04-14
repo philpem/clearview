@@ -1,0 +1,15 @@
+flags in linestr:
+
+ * font at line start (8 bits)
+ * Ipicture(s) on this line
+ * L/Rpicture on this line but this is not start
+ * Start of line is in cross ref
+ * start of line is in local def
+ * local def on this line
+ * cross ref on this line
+
+Other bits:
+
+ * left margin (inc picture skip)
+ * width (accounting for picture skip)
+ * offset to text

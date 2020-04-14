@@ -1,0 +1,150 @@
+
+#include "stdlib.h"
+#include "string.h"
+
+#include "bbc.h"
+#include "stdio.h"
+
+#include "os.h"
+#include "dbox.h"
+#include "wimp.h"
+#include "wimpt.h"
+
+#include "Reader.h"
+#include "d3.h"
+
+#define MARKS 15
+#define MARKLEN 21
+
+
+BOOL markevent(dbox d,void *event,void *handle)
+{
+wimp_eventstr *e;
+
+e=(wimp_eventstr*)event;
+if(e->e==wimp_EBUT &&
+   e->data.but.m.i>=9 &&
+   e->data.but.m.i<9+MARKS)
+  if(dataptr->ofmark[e->data.but.m.i-9])
+    e->data.but.m.i=6;
+return(FALSE);
+}
+
+os_error *bookmark(void)
+{
+dbox  d;
+int   i,field,mark;
+BOOL  filling,setfields;
+
+d=dbox_new("BookMark");
+if(!d) return(errorgen(6));
+setfields=TRUE;
+dbox_showstatic(d);
+dbox_raw_eventhandler(d,markevent,0);
+filling=TRUE;
+while(filling)
+  {
+  if(setfields)
+    {
+    for(i=0;i<MARKS;i++)
+      dbox_setfield(d,i+9,&dataptr->marknames[i*MARKLEN]);
+    dbox_setfield(d,24,""); 
+    setfields=FALSE;
+    }
+  field=dbox_fillin(d);
+  mark=0;
+  for(i=9;i<9+MARKS;i++)
+    if(dbox_getnumeric(d,i)) mark=i-9;
+  switch(field)
+    {
+    case 0:
+    case 2:
+      {
+      char name[MARKLEN],name1[MARKLEN],name2[MARKLEN];
+      char *p;
+      int  offset;
+      wimp_wstate state;
+      linestr     *l=lineptr;
+
+      wimp_get_wind_state(text_handle,&state);
+      if(state.o.y)
+        {
+        state.o.y+=PICMAR;
+        while(state.o.y+l->height<0)
+          {
+          state.o.y+=l->height;
+          l++;
+          }
+        }
+      offset=l->offset;
+      dbox_getfield(d,24,name,MARKLEN);
+      p=name+strlen(name)-1;
+      while(p>=name && *p==' ') *p--=0;
+      p=name;
+      while(*p==' ') p++;
+      i=0;
+      strcpy(name1,p);
+      if(strlen(p))
+        {
+        uppercase(name1);
+        while(i<MARKS)
+          {
+          strcpy(name2,&dataptr->marknames[i*MARKLEN]);
+          uppercase(name2);
+          if(!dataptr->ofmark[i] || !strcmp(name2,name1))
+            {
+            strcpy(&dataptr->marknames[i*MARKLEN],p);
+            dataptr->ofmark[i]=offset;
+            i=99;
+            }
+          i++;
+          }
+        if(i==MARKS)
+          wimpt_complain(errorgen(7));
+        else
+          {
+          setfields=TRUE;
+          filling=dbox_persist();
+          }
+        }
+      else
+        wimpt_complain(errorgen(8));
+      } break;
+    case 7:
+      filling=FALSE;
+      break;
+    case 5:
+      if(dataptr->ofmark[mark])
+        {
+        if(mark<MARKS-1)
+          for(i=mark;i<MARKS-1;i++)
+            {
+            dataptr->ofmark[i]=dataptr->ofmark[i+1];
+            strcpy(&dataptr->marknames[i*MARKLEN],
+                   &dataptr->marknames[i*MARKLEN+MARKLEN]);
+            }
+        dataptr->ofmark[MARKS-1]=0;
+        dataptr->marknames[(MARKS-1)*MARKLEN]=0;
+        setfields=TRUE;
+        }
+      filling=dbox_persist();
+      break;
+    case 6:
+      if(dataptr->ofmark[mark])
+        text_goto(dataptr->ofmark[mark]);
+      filling=dbox_persist();
+      break;
+    case dbox_CLOSE:
+      filling=FALSE;
+      break;
+    }
+  if(setfields && !modified)
+    {
+    modified=TRUE;
+    text_settitle();
+    }
+  }
+dbox_raw_eventhandler(d,0,0);
+dbox_dispose(&d);
+return(NULL);
+}
