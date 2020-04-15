@@ -2,7 +2,7 @@
 
 This is a 32-bit-clean (if built with the ROOL C compiler) version of Merlyn Kline's ClearView hypertext reader.
 
-ClearView allows 
+ClearView is a hypertext reader/compiler which can display wrapped text in a variety of user-selectable fonts. It can also display Sprites, Drawfiles and Ace Films in-line with the text.
 
 # Build instructions
 
