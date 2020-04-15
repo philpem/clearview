@@ -4,7 +4,7 @@ This is a 32-bit-clean (if built with the ROOL C compiler) version of Merlyn Kli
 
 ClearView is a hypertext reader/compiler which can display wrapped text in a variety of user-selectable fonts. It can also display Sprites, Drawfiles and Ace Films in-line with the text.
 
-# Build instructions
+## Build instructions
 
 At the time of writing there isn't a native Git client for RISC OS, so this is a little long-winded than it perhaps could be.
 
@@ -22,3 +22,9 @@ At the time of writing there isn't a native Git client for RISC OS, so this is a
     * Run !Produce
 
 The Production disk can then be used to make a ClearView floppy (using !ClearGen).
+
+## Credits
+
+ClearView was developed by Merlyn Kline.
+
+The EuclidX module was developed by Tony Cheal at Ace Computing. 32-bit conversion was by Martin Wurthner. It is licensed under the same terms as the original module, which was included with !Projector, !Genesis and other applications.
