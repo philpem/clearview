@@ -9,17 +9,18 @@ ObjAsmflags = -throwback -NoCache -depend !Depend
 CMHGflags = 
 LibFileflags = -c -o $@
 Squeezeflags = -o $@
+ModSqzflags = -o $@
 
 
 # Final targets:
 @.!RunImage:   @.!RunImageB 
         squeeze $(squeezeflags) @.!RunImageB 
-@.!RunImageB:   @.o.BookMark @.o.Comp @.o.d3 @.o.Errors @.o.Owner @.o.Pane \
-        @.o.PrintText @.o.Queue @.o.Reader @.o.SearchText @.o.Text @.o.Text1 \
-        C:o.stubs RISCOSLib:o.risc_oslib 
-        link $(linkflags) @.o.BookMark @.o.Comp @.o.d3 @.o.Errors @.o.Owner \
-        @.o.Pane @.o.PrintText @.o.Queue @.o.Reader @.o.SearchText @.o.Text @.o.Text1 \
-        C:o.stubs RISCOSLib:o.risc_oslib 
+@.!RunImageB:   @.o.BookMark @.o.Comp @.o.Errors @.o.Owner @.o.Pane \
+        @.o.PrintText @.o.Queue @.o.Reader @.o.SearchText @.o.Text @.o.Text1 C:o.stubs \
+        RISCOSLib:o.risc_oslib 
+        link $(linkflags) @.o.BookMark @.o.Comp @.o.Errors @.o.Owner @.o.Pane \
+        @.o.PrintText @.o.Queue @.o.Reader @.o.SearchText @.o.Text @.o.Text1 C:o.stubs \
+        RISCOSLib:o.risc_oslib 
 
 
 # User-editable dependencies:
@@ -30,8 +31,6 @@ Squeezeflags = -o $@
         cc $(ccflags) -o @.o.BookMark @.c.BookMark 
 @.o.Comp:   @.c.Comp
         cc $(ccflags) -o @.o.Comp @.c.Comp 
-@.o.d3:   @.c.d3
-        cc $(ccflags) -o @.o.d3 @.c.d3 
 @.o.Errors:   @.c.Errors
         cc $(ccflags) -o @.o.Errors @.c.Errors 
 @.o.Owner:   @.c.Owner
@@ -53,5 +52,3 @@ Squeezeflags = -o $@
 
 
 # Dynamic dependencies:
-
-
