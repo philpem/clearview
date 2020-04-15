@@ -27,6 +27,7 @@
 #include "Reader.h"
 #include "Menus.h"
 #include "Owner.h"
+#include "Control.h"
 
 #define FILETYPE_DRAW 0xaff
 #define FILETYPE_SPRITE 0xff9
