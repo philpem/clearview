@@ -38,13 +38,13 @@ char tempname[30];
 
 /*---- Define menu: Reader -------------------------------------------*/
   if ((m_reader=menu_new(
-        msgs_lookup(strcat(strcpy(tempname,"mtReader:"),progname+1)),
+        msgs_lookup(strcat(strcpy(tempname,"mtReader:"),PROGNAME)),
         msgs_lookup("m_Reader:>Info,Quit")))
                              ==NULL)
     return FALSE;
 /*---- Define menu: Reader -------------------------------------------*/
   if ((m_reader1=menu_new(
-        msgs_lookup(strcat(strcpy(tempname,"mtReader1:"),progname+1)),
+        msgs_lookup(strcat(strcpy(tempname,"mtReader1:"),PROGNAME)),
         msgs_lookup("mReader1:>Save,>Print,Tools")))
                              ==NULL)
     return FALSE;

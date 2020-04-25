@@ -27,7 +27,6 @@
 #include "Control.h"
 #include "Owner.h"
 
-char        progname[30];
 wimp_w      text_handle;
 wimp_w      pane_handle;
 text_header *dataptr;
@@ -331,7 +330,7 @@ else
       strcat(ver," ** UNFINISHED **");
     else
       if(owner_software_type()==0) strcat(ver," Eval");
-    dbox_setfield(info,1,progname+1);
+    dbox_setfield(info,1,"ClearView");
     dbox_setfield(info,4,ver);
     dbox_setfield(info,13,owner_idstr());
     }
@@ -382,10 +381,9 @@ int  i;
 
 if(!cli)
   {
-  os_read_var_val("Obey$Leaf",progname,sizeof(progname));
-  wimpt_init(progname+1);
+  wimpt_init(PROGNAME);
   flex_init();
-  res_init(progname+1);
+  res_init(PROGNAME);
   resspr_init();
   template_init();
   dbox_init();

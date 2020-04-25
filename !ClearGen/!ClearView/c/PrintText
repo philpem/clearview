@@ -68,7 +68,7 @@ do
     b=(print_box*)&rs.g;
     do
       {
-      e=print_selectjob(handle,progname,&oldhandle);
+      e=print_selectjob(handle,PROGNAME,&oldhandle);
       if(!e) e=print_giverectangle(0,&rect,&trans,&pos,0xFFFFFF00);
       if(!e) e=print_drawpage(copies,0,0,b,&more,&ident);
       if(more && !e) e=text_draw(&rs,FALSE,&lineptr,

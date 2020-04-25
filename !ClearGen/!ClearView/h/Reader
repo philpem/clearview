@@ -3,6 +3,8 @@
 #include "flex.h"
 #endif
 
+#define PROGNAME "ClearView"
+
 #define KEYCODE "Merlyn"
 
 #define LINEGAP 0
@@ -28,7 +30,7 @@
 #define LF_PIC       0x20    /* line contains start of L/R pic */
 #define LF_PICCONT   0x40    /* line contains part of L/R pic */
 #define LF_STXREF    0x80    /* line starts inside xref */
-#define LF_STDEF     0x100   /* line starts inside def */ 
+#define LF_STDEF     0x100   /* line starts inside def */
 #define LF_DEF       0x200   /* line contains xref(s) */
 #define LF_XREF      0x400   /* line contains def(s) */
 #define LF_CPIC      0x800   /* line is centred picture only */
@@ -106,7 +108,6 @@ typedef struct
   int  width;
   } h_pictdef;
 
-extern char        progname[30];
 extern wimp_w      text_handle;
 extern wimp_w      pane_handle;
 extern text_header *dataptr;
