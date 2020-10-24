@@ -23,6 +23,10 @@ At the time of writing there isn't a native Git client for RISC OS, so this is a
 
 The Production disk can then be used to make a ClearView floppy (using !ClearGen).
 
+## Other useful tools
+
+  * Willard Goosey has created a StrongED mode for ClearView: https://www.riscosopen.org/forum/forums/11/topics/15378 .
+
 ## Credits
 
 ClearView was developed by Merlyn Kline.
